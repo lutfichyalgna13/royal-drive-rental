@@ -76,13 +76,7 @@ export default function CheckoutVerificationModal({
   const [emergencyRelation, setEmergencyRelation] = useState("Keluarga");
   const [socialMedia, setSocialMedia] = useState("");
 
-  // Form Fields - Step 4 (OTP & Payment)
-  const [otpCode, setOtpCode] = useState("");
-  const [otpInput, setOtpInput] = useState("");
-  const [otpVerified, setOtpVerified] = useState(false);
-  const [otpError, setOtpError] = useState("");
-  const [showNotification, setShowNotification] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
+  // Form Fields - Step 4 (Payment)
   const [selectedBank, setSelectedBank] = useState<"bca" | "mandiri" | "bri" | "qris">("bca");
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [paymentProofUrl, setPaymentProofUrl] = useState<string>("");
@@ -101,16 +95,6 @@ export default function CheckoutVerificationModal({
     return () => clearInterval(timer);
   }, [isOpen]);
 
-  useEffect(() => {
-    let cdTimer: NodeJS.Timeout;
-    if (resendCooldown > 0) {
-      cdTimer = setInterval(() => {
-        setResendCooldown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(cdTimer);
-  }, [resendCooldown]);
-
   // Reset states upon open/close
   useEffect(() => {
     if (!isOpen) {
@@ -128,26 +112,11 @@ export default function CheckoutVerificationModal({
       setEmergencyPhone("");
       setEmergencyRelation("Keluarga");
       setSocialMedia("");
-      setOtpCode("");
-      setOtpInput("");
-      setOtpVerified(false);
-      setOtpError("");
-      setShowNotification(false);
       setPaymentProofUrl("");
       setSelectedBank("bca");
     }
   }, [isOpen]);
 
-  // Trigger simulated OTP when entering Step 4
-  const triggerOtpSend = () => {
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
-    setOtpCode(code);
-    setResendCooldown(60);
-    setTimeout(() => {
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 9000);
-    }, 600);
-  };
 
   // Image compression to strictly maintain lightweight storage (<100KB)
   const compressImageFile = (file: File, maxDimension = 600, quality = 0.6): Promise<string> => {
@@ -255,19 +224,11 @@ export default function CheckoutVerificationModal({
       return;
     }
 
-    // Advance to Step 4 & trigger WhatsApp OTP simulation
+    // Advance to Step 4
     setCurrentStep(4);
-    if (!otpCode) {
-      triggerOtpSend();
-    }
   };
 
   const handleFinalSubmit = () => {
-    if (!otpVerified && otpInput !== otpCode) {
-      setOtpError("Kode OTP WhatsApp belum diverifikasi atau salah. Mohon periksa kembali pesan verifikasi di atas.");
-      return;
-    }
-
     onSuccess({
       fullName,
       whatsapp,
@@ -296,33 +257,7 @@ export default function CheckoutVerificationModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans">
-      
-      {/* SIMULATED WHATSAPP PUSH NOTIFICATION */}
-      {showNotification && (
-        <div className="fixed top-4 sm:top-6 left-1/2 transform -translate-x-1/2 z-[100] w-[94%] max-w-md bg-slate-900 border-l-4 border-emerald-500 p-4 rounded-2xl shadow-2xl flex items-start space-x-3 text-left animate-in slide-in-from-top duration-300">
-          <div className="w-9 h-9 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
-            <MessageSquare className="w-4 h-4 fill-emerald-400" />
-          </div>
-          <div className="flex-1 font-sans text-xs">
-            <div className="flex items-center justify-between mb-0.5">
-              <span className="font-bold text-white">WhatsApp &bull; Royal Drive Official</span>
-              <span className="text-[10px] text-emerald-400 font-mono">Baru saja</span>
-            </div>
-            <p className="text-slate-300 text-[11px] leading-relaxed">
-              Halo <strong>{fullName || "Pelanggan"}</strong>, KODE VERIFIKASI RESERVASI Anda adalah:{" "}
-              <strong className="text-emerald-400 text-sm font-mono tracking-widest bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-600/40">
-                {otpCode}
-              </strong>. Masukkan kode ini untuk mengonfirmasi pemesanan unit {bookingDetails.carName}.
-            </p>
-          </div>
-          <button
-            onClick={() => setShowNotification(false)}
-            className="text-slate-400 hover:text-white p-1 transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+
 
       {/* MODAL MAIN CONTAINER */}
       <div className="w-full max-w-3xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden text-left flex flex-col max-h-[92vh] my-4 animate-in fade-in zoom-in-95 duration-200">
@@ -849,78 +784,27 @@ export default function CheckoutVerificationModal({
             </div>
           )}
 
-          {/* ================= STEP 4: OTP & PANDUAN PEMBAYARAN DP ================= */}
+          {/* ================= STEP 4: PANDUAN PEMBAYARAN DP ================= */}
           {currentStep === 4 && (
             <div className="space-y-6 animate-in fade-in duration-200 text-xs">
               
-              {/* Section 4A: WhatsApp OTP Verification */}
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700">
-                      <Key className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">Verifikasi Keamanan WhatsApp</span>
-                      <span className="text-[10px] text-slate-400 block">Dikirim ke {whatsapp}</span>
-                    </div>
+              {/* Trust & Verification Confirmation Banner */}
+              <div className="p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-2xl flex items-center justify-between shadow-xs">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+                    <ShieldCheck className="w-4 h-4" />
                   </div>
-                  {otpVerified ? (
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full flex items-center space-x-1">
-                      <Check className="w-3 h-3" />
-                      <span>Terverifikasi</span>
-                    </span>
-                  ) : (
-                    <button
-                      onClick={triggerOtpSend}
-                      disabled={resendCooldown > 0}
-                      className="text-[10px] text-accent hover:underline font-bold disabled:opacity-40 cursor-pointer"
-                    >
-                      {resendCooldown > 0 ? `Kirim Ulang (${resendCooldown}s)` : "Kirim Ulang Kode"}
-                    </button>
-                  )}
+                  <div>
+                    <span className="font-bold text-slate-800 text-xs block">Identitas & Berkas Berhasil Diverifikasi</span>
+                    <span className="text-[10px] text-slate-500 block">Kunci reservasi unit Anda dengan transfer DP (Uang Muka) di bawah ini.</span>
+                  </div>
                 </div>
-
-                {!otpVerified && (
-                  <div className="flex items-center space-x-3 pt-1">
-                    <input
-                      type="text"
-                      maxLength={4}
-                      value={otpInput}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, "");
-                        setOtpInput(val);
-                        if (val === otpCode && otpCode !== "") {
-                          setOtpVerified(true);
-                          setOtpError("");
-                        }
-                      }}
-                      placeholder="4 Digit Kode OTP"
-                      className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-center text-slate-900 font-mono text-base tracking-[0.4em] font-black focus:outline-none focus:border-emerald-500 shadow-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (otpInput === otpCode && otpCode !== "") {
-                          setOtpVerified(true);
-                          setOtpError("");
-                        } else {
-                          setOtpError("Kode OTP tidak cocok dengan pesan WhatsApp simulasi di atas.");
-                        }
-                      }}
-                      className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors cursor-pointer text-xs"
-                    >
-                      Validasi
-                    </button>
-                  </div>
-                )}
-
-                {otpError && (
-                  <span className="text-[10px] text-rose-600 font-medium block">
-                    {otpError}
-                  </span>
-                )}
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full flex items-center space-x-1 shrink-0">
+                  <Check className="w-3 h-3" />
+                  <span>Data Valid</span>
+                </span>
               </div>
+
 
               {/* Section 4B: Payment DP Instructions with Countdown Timer */}
               <div className="space-y-3">
@@ -1140,7 +1024,7 @@ export default function CheckoutVerificationModal({
               onClick={handleNextFromStep3}
               className="px-6 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-display font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center space-x-2 shadow-lg shadow-accent/20"
             >
-              <span>Lanjut: Pembayaran DP & OTP</span>
+              <span>Lanjut: Pembayaran DP</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           )}

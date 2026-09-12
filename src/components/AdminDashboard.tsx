@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ShieldAlert, LayoutDashboard, Car, Calendar, Users, Sliders, LogOut, 
+  ShieldAlert, LayoutDashboard, Car, Calendar, Users, Sliders, LogOut, UserX, UserPlus, PhoneCall, History, ExternalLink, AlertOctagon, 
   ArrowLeft, Plus, Edit, Trash, Check, AlertCircle, BarChart3, TrendingUp, X, Sparkles,
   Tag, MessageSquare, HelpCircle, Star, Image, FileText, Play,
   Printer, FileCheck, ShieldCheck, UserCheck, ClipboardCheck, Phone, Eye, CheckCircle2, Download, Send, Search, CheckSquare, Square, FileSignature, Receipt,
@@ -230,6 +230,78 @@ const initialExpenseRecords: ExpenseRecord[] = [
     amount: 600000,
     description: "Uang saku sopir trip luar kota Jakarta-Bandung 2 hari.",
     recordedBy: "Admin Keuangan"
+  }
+];
+
+
+export interface CustomerRecord {
+  id: string;
+  name: string;
+  phone: string;
+  nik?: string;
+  totalBookings: number;
+  totalSpent: number;
+  status: "VIP" | "Reguler" | "Blacklist";
+  blacklistReason?: string;
+  notes?: string;
+  lastRentedCar?: string;
+  lastRentedDate?: string;
+  createdAt: string;
+}
+
+const initialCustomersList: CustomerRecord[] = [
+  {
+    id: "CUST-001",
+    name: "Rian Prasetyo",
+    phone: "081298765432",
+    nik: "3171021990080001",
+    totalBookings: 4,
+    totalSpent: 4200000,
+    status: "VIP",
+    notes: "Pelanggan setia sejak 2025, pengembalian unit selalu bersih dan tepat waktu.",
+    lastRentedCar: "Toyota Avanza 1.5G",
+    lastRentedDate: "2026-09-10",
+    createdAt: "2025-11-15"
+  },
+  {
+    id: "CUST-002",
+    name: "Budi Gunawan",
+    phone: "081388776655",
+    nik: "3275011985040003",
+    totalBookings: 1,
+    totalSpent: 900000,
+    status: "Blacklist",
+    blacklistReason: "Membawa unit melewati batas waktu 2 hari tanpa kabar, menolak membayar ganti rugi goresan bumper belakang.",
+    notes: "Daftar hitam aktif - jangan terima reservasi tanpa deposit 100% dan penjamin.",
+    lastRentedCar: "Daihatsu Sigra 1.2R",
+    lastRentedDate: "2026-08-20",
+    createdAt: "2026-08-18"
+  },
+  {
+    id: "CUST-003",
+    name: "Siti Rahmawati",
+    phone: "087811223344",
+    nik: "3174091995120002",
+    totalBookings: 2,
+    totalSpent: 2600000,
+    status: "Reguler",
+    notes: "Sewa keluarga akhir pekan ke Bandung.",
+    lastRentedCar: "Mitsubishi Xpander Ultimate",
+    lastRentedDate: "2026-09-02",
+    createdAt: "2026-06-10"
+  },
+  {
+    id: "CUST-004",
+    name: "Hendro Wijaya",
+    phone: "081199887766",
+    nik: "3172051988070004",
+    totalBookings: 5,
+    totalSpent: 12500000,
+    status: "VIP",
+    notes: "Direktur PT Mahakarya, sewa Alphard dan Camry untuk tamu korporat bulanan.",
+    lastRentedCar: "Toyota Alphard Executive Lounge",
+    lastRentedDate: "2026-09-08",
+    createdAt: "2025-09-01"
   }
 ];
 
@@ -637,7 +709,7 @@ export default function AdminDashboard({
   setBlogPosts,
   onClose 
 }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<"analytics" | "fleet" | "bookings" | "drivers" | "maintenance" | "finance" | "testimonials" | "faqs" | "appearance" | "settings" | "blog">("analytics");
+  const [activeTab, setActiveTab] = useState<"analytics" | "fleet" | "bookings" | "customers" | "drivers" | "maintenance" | "finance" | "testimonials" | "faqs" | "appearance" | "settings" | "blog">("analytics");
   const [bookings, setBookings] = useState<BookingRecord[]>(initialBookings);
 
   // Operational Modals State
@@ -648,7 +720,158 @@ export default function AdminDashboard({
   const [selectedProofBooking, setSelectedProofBooking] = useState<BookingRecord | null>(null);
   const [selectedDispatchBooking, setSelectedDispatchBooking] = useState<BookingRecord | null>(null);
 
-  // Driver Management State
+    // Customer CRM & Blacklist Management State
+  const [customers, setCustomers] = useState<CustomerRecord[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("royal_drive_customers_v1");
+        if (saved) return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return initialCustomersList;
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("royal_drive_customers_v1", JSON.stringify(customers));
+      } catch (e) {}
+    }
+  }, [customers]);
+
+  const [customerSearchQuery, setCustomerSearchQuery] = useState("");
+  const [customerStatusFilter, setCustomerStatusFilter] = useState<"all" | "VIP" | "Reguler" | "Blacklist">("all");
+  const [isBlacklistModalOpen, setIsBlacklistModalOpen] = useState(false);
+  const [selectedCustomerForBlacklist, setSelectedCustomerForBlacklist] = useState<CustomerRecord | null>(null);
+  const [blacklistReasonInput, setBlacklistReasonInput] = useState("");
+  const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
+  const [custNameInput, setCustNameInput] = useState("");
+  const [custPhoneInput, setCustPhoneInput] = useState("");
+  const [custNikInput, setCustNikInput] = useState("");
+  const [custStatusInput, setCustStatusInput] = useState<"VIP" | "Reguler" | "Blacklist">("Reguler");
+  const [custNotesInput, setCustNotesInput] = useState("");
+
+  // Smart WhatsApp Template Modal State
+  const [selectedWaBooking, setSelectedWaBooking] = useState<BookingRecord | null>(null);
+  const [isWaModalOpen, setIsWaModalOpen] = useState(false);
+  const [waTemplateType, setWaTemplateType] = useState<"dp" | "ready" | "return" | "deposit">("dp");
+
+  // Operational Pool Fleet Status (Ready, On Rent, Reserved, Maintenance)
+  const [fleetPoolStatus, setFleetPoolStatus] = useState<Record<string, "ready" | "on_rent" | "reserved" | "maintenance">>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("royal_drive_fleet_pool_status_v1");
+        if (saved) return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return {
+      "toyota-calya": "ready",
+      "daihatsu-sigra": "on_rent",
+      "toyota-avanza": "on_rent",
+      "daihatsu-xenia": "ready",
+      "mitsubishi-xpander": "ready",
+      "toyota-innova-reborn": "on_rent",
+      "toyota-innova-zenix": "reserved",
+      "suzuki-ertiga": "ready",
+      "honda-brio": "ready",
+      "toyota-agya": "ready",
+      "daihatsu-ayla": "ready",
+      "mitsubishi-pajero-sport": "maintenance",
+      "toyota-fortuner": "ready",
+      "honda-crv": "ready",
+      "toyota-alphard": "reserved",
+      "toyota-camry": "ready",
+      "mercedes-benz-s-class": "ready",
+      "hyundai-ioniq-5": "ready",
+      "wuling-air-ev": "ready",
+      "toyota-hiace": "ready",
+      "isuzu-elf": "ready",
+      "mercedes-benz-c300": "reserved",
+    };
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("royal_drive_fleet_pool_status_v1", JSON.stringify(fleetPoolStatus));
+      } catch (e) {}
+    }
+  }, [fleetPoolStatus]);
+
+  const setCarOperationalStatus = (carId: string, status: "ready" | "on_rent" | "reserved" | "maintenance") => {
+    setFleetPoolStatus(prev => ({
+      ...prev,
+      [carId]: status
+    }));
+  };
+
+  // Auto-sync customer database from incoming bookings
+  useEffect(() => {
+    if (!bookings || bookings.length === 0) return;
+    setCustomers(prev => {
+      const updated = [...prev];
+      bookings.forEach(b => {
+        if (!b.phone) return;
+        const cleanPhone = b.phone.replace(/\D/g, "");
+        const existingIdx = updated.findIndex(
+          c => c.phone.replace(/\D/g, "") === cleanPhone || (b.documents?.ktpNumber && c.nik && c.nik === b.documents.ktpNumber)
+        );
+        if (existingIdx >= 0) {
+          const current = updated[existingIdx];
+          if (!current.lastRentedDate || b.startDate > current.lastRentedDate) {
+            updated[existingIdx] = {
+              ...current,
+              lastRentedCar: b.car,
+              lastRentedDate: b.startDate,
+              totalSpent: current.totalSpent + (b.totalPrice || 0)
+            };
+          }
+        } else {
+          updated.push({
+            id: `CUST-${Date.now().toString().slice(-4)}`,
+            name: b.client,
+            phone: b.phone,
+            nik: b.documents?.ktpNumber || "-",
+            totalBookings: 1,
+            totalSpent: b.totalPrice || 0,
+            status: "Reguler",
+            notes: "Terdaftar otomatis dari pemesanan armada.",
+            lastRentedCar: b.car,
+            lastRentedDate: b.startDate,
+            createdAt: new Date().toISOString().split("T")[0]
+          });
+        }
+      });
+      return updated;
+    });
+  }, [bookings]);
+
+  // Blacklist check helper
+  const getCustomerBlacklist = (phone?: string, nik?: string): CustomerRecord | null => {
+    if (!phone && !nik) return null;
+    const cleanPhone = (phone || "").replace(/\D/g, "");
+    const found = customers.find(c => 
+      c.status === "Blacklist" && 
+      ((cleanPhone && c.phone.replace(/\D/g, "") === cleanPhone) || (nik && c.nik && c.nik === nik))
+    );
+    return found || null;
+  };
+
+  // Open Smart WA modal
+  const openSmartWaModal = (booking: BookingRecord, type: "dp" | "ready" | "return" | "deposit" = "dp") => {
+    setSelectedWaBooking(booking);
+    setWaTemplateType(type);
+    setIsWaModalOpen(true);
+  };
+
+  // Today returning bookings calculation
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todayReturningBookings = bookings.filter(b => 
+    (b.status === "Active" || b.status === "Pending") && 
+    (b.endDate <= todayStr)
+  );
+
+// Driver Management State
   const [drivers, setDrivers] = useState<DriverRecord[]>(initialDriversList);
   const [isDriverModalOpen, setIsDriverModalOpen] = useState<boolean>(false);
   const [editingDriver, setEditingDriver] = useState<DriverRecord | null>(null);
@@ -3493,6 +3716,52 @@ export default function AdminDashboard({
               </div>
             </div>
 
+                        {/* Widget Pengembalian Hari Ini & Overtime Monitoring */}
+            {todayReturningBookings.length > 0 && (
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-4 shadow-xs text-left">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
+                    <span className="font-display font-bold text-xs uppercase tracking-wider text-amber-900">
+                      Jadwal Pengembalian Unit Hari Ini ({todayReturningBookings.length} Armada)
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-amber-700 font-medium">
+                    Pantau serah terima unit tepat waktu & hindari keterlambatan / overtime
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {todayReturningBookings.map((b) => (
+                    <div key={b.id} className="bg-white p-3 rounded-xl border border-amber-200/60 shadow-2xs flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center space-x-1.5 truncate">
+                          <strong className="text-xs text-slate-900 truncate">{b.car}</strong>
+                          <span className="text-[10px] font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 shrink-0">{b.carPlate}</span>
+                        </div>
+                        <span className="text-[11px] text-slate-600 block mt-0.5 truncate">
+                          Penyewa: <strong>{b.client}</strong>
+                        </span>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className="text-[10px] text-amber-700 font-semibold bg-amber-100/70 px-1.5 py-0.5 rounded">
+                            Batas: Hari Ini (18:00 WIB)
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => openSmartWaModal(b, "return")}
+                        className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center space-x-1 cursor-pointer transition-colors shadow-xs shrink-0"
+                        title="Kirim pengingat pengembalian unit via WhatsApp"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span className="text-[10px]">Ingatkan</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Table */}
             <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
               <table className="w-full text-left border-collapse min-w-[950px]">
@@ -3541,7 +3810,15 @@ export default function AdminDashboard({
 
                         {/* Penyewa */}
                         <td className="py-4 px-4">
-                          <span className="font-semibold text-slate-900 block">{booking.client}</span>
+                          <div className="flex items-center space-x-1.5">
+                            <span className="font-semibold text-slate-900 block">{booking.client}</span>
+                            {getCustomerBlacklist(booking.phone, booking.documents?.ktpNumber) && (
+                              <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[8px] font-black bg-rose-600 text-white animate-pulse" title={`DAFTAR HITAM (BLACKLIST): ${getCustomerBlacklist(booking.phone, booking.documents?.ktpNumber)?.blacklistReason || "Penyewa bermasalah"}`}>
+                                <AlertOctagon className="w-2.5 h-2.5" />
+                                <span>BLACKLIST</span>
+                              </span>
+                            )}
+                          </div>
                           <a
                             href={`https://wa.me/${booking.phone.replace(/\D/g, "")}`}
                             target="_blank"
@@ -3679,6 +3956,16 @@ export default function AdminDashboard({
                               <FileCheck className="w-3.5 h-3.5" />
                             </button>
 
+                            {/* Tombol Smart WA Templates */}
+                            <button
+                              type="button"
+                              onClick={() => openSmartWaModal(booking, "dp")}
+                              className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-200 transition-colors cursor-pointer"
+                              title="Kirim Template Pesan WhatsApp Cepat (Tagihan DP, Unit Siap, Reminder)"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                            </button>
+
                             {/* Tombol Bukti Transfer DP */}
                             <button
                               onClick={() => setSelectedProofBooking(booking)}
@@ -3803,6 +4090,317 @@ export default function AdminDashboard({
         )}
 
         {/* TAB: Kelola Driver */}
+        
+        {/* ================= DATA PELANGGAN & BLACKLIST ANTI-FRAUD TAB ================= */}
+        {activeTab === "customers" && (
+          <div className="space-y-6 text-left">
+            {/* Header & Quick Add */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-accent font-semibold block">
+                  Customer Relationship Management & Security
+                </span>
+                <h3 className="font-display font-extrabold text-xl md:text-2xl text-slate-800">
+                  Data Pelanggan & Blacklist Anti-Fraud
+                </h3>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
+                  Basis data seluruh penyewa, riwayat transaksi, penandaan status VIP, dan proteksi blacklist terhadap penyewa bermasalah.
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddCustomerModalOpen(true)}
+                  className="flex items-center space-x-2 bg-accent hover:bg-accent-hover text-white font-display font-semibold text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all focus:outline-none cursor-pointer shadow-md shadow-accent/20"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>+ Tambah Pelanggan</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Metric KPI Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Total Pelanggan</span>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-display font-black text-2xl text-slate-900">{customers.length}</span>
+                  <span className="text-xs text-slate-500">Orang</span>
+                </div>
+                <span className="text-[10px] text-slate-400 block mt-1">Tersinkronisasi otomatis dari reservasi</span>
+              </div>
+
+              <div className="p-4 bg-amber-50/60 border border-amber-200/80 rounded-2xl shadow-xs">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-700 block mb-1">Pelanggan VIP</span>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-display font-black text-2xl text-amber-800">
+                    {customers.filter(c => c.status === "VIP").length}
+                  </span>
+                  <span className="text-xs text-amber-700 font-semibold">Prioritas</span>
+                </div>
+                <span className="text-[10px] text-amber-600 block mt-1">Penyewa terpercaya & rutin</span>
+              </div>
+
+              <div className="p-4 bg-rose-50/60 border border-rose-200/80 rounded-2xl shadow-xs">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-rose-700 block mb-1">Daftar Hitam (Blacklist)</span>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-display font-black text-2xl text-rose-800">
+                    {customers.filter(c => c.status === "Blacklist").length}
+                  </span>
+                  <span className="text-xs text-rose-700 font-semibold">Resiko Tinggi</span>
+                </div>
+                <span className="text-[10px] text-rose-600 block mt-1">Diblokir dari sistem pemesanan</span>
+              </div>
+
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Total Belanja Pelanggan</span>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-display font-black text-xl text-emerald-700">
+                    {formatRupiah(customers.reduce((acc, c) => acc + (c.totalSpent || 0), 0))}
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 block mt-1">Akumulasi sewa armada</span>
+              </div>
+            </div>
+
+            {/* Filter & Search Bar */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center space-x-1.5 overflow-x-auto w-full sm:w-auto">
+                {[
+                  { id: "all", label: "Semua", count: customers.length },
+                  { id: "VIP", label: "VIP Prioritas", count: customers.filter(c => c.status === "VIP").length },
+                  { id: "Reguler", label: "Reguler", count: customers.filter(c => c.status === "Reguler").length },
+                  { id: "Blacklist", label: "Blacklist", count: customers.filter(c => c.status === "Blacklist").length },
+                ].map(st => (
+                  <button
+                    key={st.id}
+                    onClick={() => setCustomerStatusFilter(st.id as any)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      customerStatusFilter === st.id
+                        ? st.id === "Blacklist"
+                          ? "bg-rose-600 text-white shadow-xs"
+                          : st.id === "VIP"
+                          ? "bg-amber-600 text-white shadow-xs"
+                          : "bg-slate-900 text-white shadow-xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {st.label} ({st.count})
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative w-full sm:w-72">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Cari nama, nomor WA, NIK..."
+                  value={customerSearchQuery}
+                  onChange={(e) => setCustomerSearchQuery(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 pl-8 pr-3 py-2 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+
+            {/* Customers Table */}
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
+              <table className="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                  <tr className="border-b border-slate-200 font-display text-[9px] uppercase tracking-widest text-slate-500 bg-slate-50">
+                    <th className="py-4 px-4">Nama Pelanggan</th>
+                    <th className="py-4 px-4">Kontak & NIK</th>
+                    <th className="py-4 px-4">Riwayat Sewa</th>
+                    <th className="py-4 px-4">Unit Terakhir</th>
+                    <th className="py-4 px-4">Status & Catatan</th>
+                    <th className="py-4 px-4 text-right">Aksi Manajemen</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-sans">
+                  {customers
+                    .filter(c => {
+                      if (customerStatusFilter !== "all" && c.status !== customerStatusFilter) return false;
+                      if (customerSearchQuery.trim()) {
+                        const q = customerSearchQuery.toLowerCase();
+                        return (
+                          c.name.toLowerCase().includes(q) ||
+                          c.phone.includes(q) ||
+                          (c.nik && c.nik.includes(q)) ||
+                          (c.notes && c.notes.toLowerCase().includes(q))
+                        );
+                      }
+                      return true;
+                    })
+                    .map(cust => (
+                      <tr key={cust.id} className={`hover:bg-slate-50/80 transition-colors ${cust.status === "Blacklist" ? "bg-rose-50/30" : ""}`}>
+                        {/* Nama */}
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center space-x-2.5">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                              cust.status === "Blacklist"
+                                ? "bg-rose-100 text-rose-700"
+                                : cust.status === "VIP"
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-slate-100 text-slate-700"
+                            }`}>
+                              {cust.name.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <strong className="text-slate-900 block text-xs">{cust.name}</strong>
+                              <span className="text-[10px] text-slate-400 font-mono">ID: {cust.id}</span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Kontak & NIK */}
+                        <td className="py-3.5 px-4">
+                          <div className="space-y-0.5">
+                            <a
+                              href={`https://wa.me/${cust.phone.replace(/\D/g, "")}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-slate-700 hover:text-emerald-700 font-medium flex items-center space-x-1"
+                            >
+                              <Phone className="w-3 h-3 text-emerald-600" />
+                              <span>{cust.phone}</span>
+                            </a>
+                            <span className="text-[10px] text-slate-400 block font-mono">
+                              NIK: {cust.nik || "-"}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Riwayat Sewa */}
+                        <td className="py-3.5 px-4">
+                          <div>
+                            <span className="font-bold text-slate-800 block">{cust.totalBookings}x Transaksi</span>
+                            <span className="text-[11px] text-emerald-600 font-semibold block">
+                              {formatRupiah(cust.totalSpent)}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Unit Terakhir */}
+                        <td className="py-3.5 px-4">
+                          <div>
+                            <span className="font-medium text-slate-800 block text-xs">{cust.lastRentedCar || "-"}</span>
+                            <span className="text-[10px] text-slate-400 block">
+                              {cust.lastRentedDate ? `Tgl: ${cust.lastRentedDate}` : "-"}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Status & Catatan */}
+                        <td className="py-3.5 px-4 max-w-xs">
+                          <div className="space-y-1">
+                            {cust.status === "VIP" && (
+                              <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                <Sparkles className="w-3 h-3 text-amber-600" />
+                                <span>VIP Prioritas</span>
+                              </span>
+                            )}
+                            {cust.status === "Reguler" && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700">
+                                Reguler
+                              </span>
+                            )}
+                            {cust.status === "Blacklist" && (
+                              <div className="space-y-1">
+                                <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                  <AlertOctagon className="w-3 h-3 text-rose-600" />
+                                  <span>BLACKLIST AKTIF</span>
+                                </span>
+                                {cust.blacklistReason && (
+                                  <p className="text-[10px] text-rose-700 font-normal leading-tight italic bg-rose-50 p-1 rounded border border-rose-200">
+                                    "{cust.blacklistReason}"
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            {cust.notes && cust.status !== "Blacklist" && (
+                              <p className="text-[10px] text-slate-500 line-clamp-1">{cust.notes}</p>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* Aksi */}
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end space-x-1.5">
+                            {cust.status !== "VIP" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, status: "VIP" } : c));
+                                }}
+                                className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
+                                title="Jadikan Pelanggan VIP"
+                              >
+                                Set VIP
+                              </button>
+                            )}
+
+                            {cust.status !== "Reguler" && cust.status !== "Blacklist" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, status: "Reguler" } : c));
+                                }}
+                                className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-medium transition-colors cursor-pointer"
+                                title="Ubah ke Reguler"
+                              >
+                                Set Reguler
+                              </button>
+                            )}
+
+                            {cust.status !== "Blacklist" ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedCustomerForBlacklist(cust);
+                                  setBlacklistReasonInput("");
+                                  setIsBlacklistModalOpen(true);
+                                }}
+                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-[10px] font-bold transition-colors cursor-pointer flex items-center space-x-1"
+                                title="Tandai sebagai Blacklist (Anti-Fraud)"
+                              >
+                                <UserX className="w-3 h-3" />
+                                <span>Blacklist</span>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (confirm(`Pulihkan status pelanggan ${cust.name} dari Blacklist menjadi Reguler?`)) {
+                                    setCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, status: "Reguler", blacklistReason: undefined } : c));
+                                  }
+                                }}
+                                className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-bold transition-colors cursor-pointer flex items-center space-x-1"
+                                title="Buka Blokir Blacklist"
+                              >
+                                <Check className="w-3 h-3" />
+                                <span>Pulihkan</span>
+                              </button>
+                            )}
+
+                            <a
+                              href={`https://wa.me/${cust.phone.replace(/\D/g, "")}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
+                              title="Chat WhatsApp"
+                            >
+                              <MessageSquare className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {activeTab === "drivers" && (
           <div className="space-y-8 text-left">
             {/* Header & Add Button */}
@@ -6078,6 +6676,25 @@ export default function AdminDashboard({
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Blacklist Anti-Fraud Warning Banner */}
+            {getCustomerBlacklist(selectedVerificationBooking.phone, selectedVerificationBooking.documents?.ktpNumber) && (
+              <div className="mx-6 mt-6 p-4 bg-rose-50 border-2 border-rose-500 rounded-2xl flex items-start space-x-3 text-rose-900 animate-pulse text-left">
+                <AlertOctagon className="w-6 h-6 text-rose-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-display font-black text-xs sm:text-sm uppercase tracking-wider block text-rose-800">
+                    ⚠️ PERINGATAN RESIKO TINGGI: PENYEWA INI TERDAFTAR DALAM DAFTAR HITAM (BLACKLIST)!
+                  </span>
+                  <p className="text-xs text-rose-700 font-medium leading-relaxed">
+                    Penyewa ini memiliki catatan pelanggaran:{" "}
+                    <strong>"{getCustomerBlacklist(selectedVerificationBooking.phone, selectedVerificationBooking.documents?.ktpNumber)?.blacklistReason || "Terindikasi masalah pada transaksi sewa sebelumnya."}"</strong>.
+                  </p>
+                  <span className="text-[11px] text-rose-600 font-bold block pt-0.5">
+                    Rekomendasi: TOLAK pesanan ini atau tahan deposit penuh & verifikasi fisik langsung.
+                  </span>
+                </div>
+              </div>
+            )}
 
             <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
               {/* Kolom Kiri: Pratinjau Dokumen KTP & SIM A */}
@@ -8690,6 +9307,375 @@ export default function AdminDashboard({
           </motion.div>
         )}
       </AnimatePresence>
+
+
+        {/* ================= MODAL BLACKLIST PELANGGAN ================= */}
+        {isBlacklistModalOpen && selectedCustomerForBlacklist && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white border border-rose-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 text-left animate-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between pb-3 border-b border-rose-100">
+                <div className="flex items-center space-x-2 text-rose-700">
+                  <UserX className="w-5 h-5 text-rose-600" />
+                  <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">
+                    Tandai Blacklist (Daftar Hitam)
+                  </h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsBlacklistModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
+                <span className="text-[11px] text-rose-800 font-bold block">
+                  Nama: {selectedCustomerForBlacklist.name} ({selectedCustomerForBlacklist.phone})
+                </span>
+                <span className="text-[10px] text-rose-600 block">
+                  NIK: {selectedCustomerForBlacklist.nik || "-"}
+                </span>
+                <p className="text-[10px] text-rose-700 leading-relaxed mt-1">
+                  Penyewa yang masuk Blacklist akan memicu tanda bahaya merah setiap kali membuat reservasi atau saat admin memverifikasi pesanan.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 block">
+                  Alasan Blacklist & Riwayat Pelanggaran: *
+                </label>
+                <textarea
+                  rows={3}
+                  value={blacklistReasonInput}
+                  onChange={(e) => setBlacklistReasonInput(e.target.value)}
+                  placeholder="Contoh: Terlambat 2 hari tanpa kabar, menolak membayar ganti rugi goresan bodi mobil, atau indikasi pemalsuan dokumen..."
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsBlacklistModalOpen(false)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!blacklistReasonInput.trim()) {
+                      alert("Mohon masukkan alasan blacklist untuk catatan keamanan.");
+                      return;
+                    }
+                    setCustomers(prev => prev.map(c => 
+                      c.id === selectedCustomerForBlacklist.id 
+                        ? { ...c, status: "Blacklist", blacklistReason: blacklistReasonInput.trim() }
+                        : c
+                    ));
+                    setIsBlacklistModalOpen(false);
+                    alert(`Pelanggan ${selectedCustomerForBlacklist.name} berhasil ditandai sebagai BLACKLIST.`);
+                  }}
+                  className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-md shadow-rose-600/20"
+                >
+                  Konfirmasi Blacklist
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= MODAL TAMBAH PELANGGAN ================= */}
+        {isAddCustomerModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 text-left animate-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center space-x-2 text-slate-800">
+                  <UserPlus className="w-5 h-5 text-accent" />
+                  <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">
+                    Tambah Data Pelanggan Baru
+                  </h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAddCustomerModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Nama Lengkap Penyewa: *</label>
+                  <input
+                    type="text"
+                    value={custNameInput}
+                    onChange={(e) => setCustNameInput(e.target.value)}
+                    placeholder="Contoh: Budi Prasetyo"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Nomor WhatsApp: *</label>
+                    <input
+                      type="text"
+                      value={custPhoneInput}
+                      onChange={(e) => setCustPhoneInput(e.target.value)}
+                      placeholder="08123456789"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">NIK KTP (16 Digit):</label>
+                    <input
+                      type="text"
+                      maxLength={16}
+                      value={custNikInput}
+                      onChange={(e) => setCustNikInput(e.target.value)}
+                      placeholder="3171..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-accent"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Status Pelanggan:</label>
+                  <select
+                    value={custStatusInput}
+                    onChange={(e) => setCustStatusInput(e.target.value as any)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-accent"
+                  >
+                    <option value="Reguler">Reguler</option>
+                    <option value="VIP">VIP Prioritas</option>
+                    <option value="Blacklist">Blacklist (Daftar Hitam)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Catatan Khusus (Opsional):</label>
+                  <textarea
+                    rows={2}
+                    value={custNotesInput}
+                    onChange={(e) => setCustNotesInput(e.target.value)}
+                    placeholder="Catatan kebiasaan sewa, alamat, atau penjamin..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-accent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddCustomerModalOpen(false)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!custNameInput.trim() || !custPhoneInput.trim()) {
+                      alert("Mohon lengkapi nama dan nomor WhatsApp.");
+                      return;
+                    }
+                    const newCust: CustomerRecord = {
+                      id: `CUST-${Date.now().toString().slice(-4)}`,
+                      name: custNameInput.trim(),
+                      phone: custPhoneInput.trim(),
+                      nik: custNikInput.trim() || "-",
+                      status: custStatusInput,
+                      totalBookings: 0,
+                      totalSpent: 0,
+                      notes: custNotesInput.trim() || "-",
+                      createdAt: new Date().toISOString().split("T")[0]
+                    };
+                    setCustomers(prev => [newCust, ...prev]);
+                    setIsAddCustomerModalOpen(false);
+                    setCustNameInput("");
+                    setCustPhoneInput("");
+                    setCustNikInput("");
+                    setCustNotesInput("");
+                    alert(`Pelanggan ${newCust.name} berhasil ditambahkan.`);
+                  }}
+                  className="flex-1 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-md shadow-accent/20"
+                >
+                  Simpan Pelanggan
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= MODAL TEMPLATE WHATSAPP CEPAT ================= */}
+        {isWaModalOpen && selectedWaBooking && (
+          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white border border-emerald-200 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-4 text-left animate-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between pb-3 border-b border-emerald-100">
+                <div className="flex items-center space-x-2 text-emerald-800">
+                  <MessageSquare className="w-5 h-5 text-emerald-600" />
+                  <div>
+                    <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">
+                      Kirim Pesan WhatsApp Cepat
+                    </h4>
+                    <span className="text-[10px] text-slate-400 font-sans block">
+                      Kepada: {selectedWaBooking.client} ({selectedWaBooking.phone})
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsWaModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Template Tab Selector */}
+              <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setWaTemplateType("dp")}
+                  className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                    waTemplateType === "dp"
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-2xs font-bold"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>1. Tagihan DP 30%</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWaTemplateType("ready")}
+                  className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                    waTemplateType === "ready"
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-2xs font-bold"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>2. Unit Siap & Supir</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWaTemplateType("return")}
+                  className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                    waTemplateType === "return"
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-2xs font-bold"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>3. Pengingat Selesai (H-3)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWaTemplateType("deposit")}
+                  className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
+                    waTemplateType === "deposit"
+                      ? "bg-emerald-50 border-emerald-500 text-emerald-800 shadow-2xs font-bold"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <span>4. Refund Jaminan Sewa</span>
+                </button>
+              </div>
+
+              {/* Message Preview Box */}
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold text-slate-700 block">Pratinjau Pesan yang Akan Dikirim:</span>
+                <div className="p-3.5 bg-slate-900 text-slate-200 rounded-2xl font-mono text-[11px] leading-relaxed whitespace-pre-line max-h-56 overflow-y-auto">
+                  {waTemplateType === "dp" && (
+`Halo Bapak/Ibu ${selectedWaBooking.client},
+
+Terima kasih telah melakukan reservasi di Royal Drive Rental Mobil.
+ID Booking: ${selectedWaBooking.id}
+Unit: ${selectedWaBooking.car} (${selectedWaBooking.carPlate})
+Jadwal: ${selectedWaBooking.startDate} s/d ${selectedWaBooking.endDate} (${selectedWaBooking.durationDays} Hari)
+
+Rincian Pembayaran Uang Muka (DP 30%):
+Nominal DP: ${formatRupiah(selectedWaBooking.depositAmount || Math.round(selectedWaBooking.totalPrice * 0.3))}
+Sisa Pelunasan: ${formatRupiah(selectedWaBooking.totalPrice - (selectedWaBooking.depositAmount || Math.round(selectedWaBooking.totalPrice * 0.3)))} (di lokasi serah terima)
+
+Rekening Resmi PT Royal Drive:
+- BCA: 8820-9918-22
+- Mandiri: 137-00-99812-00
+a/n PT ROYAL DRIVE INDONESIA
+
+Mohon konfirmasi bukti transfer sebelum 2 jam ke depan agar unit tetap terkunci aman untuk Anda. Terima kasih!`
+                  )}
+
+                  {waTemplateType === "ready" && (
+`Halo Bapak/Ibu ${selectedWaBooking.client},
+
+Pemberitahuan resmi dari Royal Drive:
+Unit armada Anda: ${selectedWaBooking.car} (Plat: ${selectedWaBooking.carPlate}) saat ini telah SELESAI DICUCI BERSIH & MELEWATI INSPEKSI 25 TITIK.
+
+${selectedWaBooking.rentalType === "Dengan Sopir" ? `Supir Anda: ${selectedWaBooking.driverName || "Driver Profesional Royal Drive"} (${selectedWaBooking.driverPhone || "Standby"}) siap meluncur menjemput di ${selectedWaBooking.pickupLocation || "lokasi penjemputan"}.` : `Unit siap diambil / diantar ke ${selectedWaBooking.pickupLocation || "lokasi yang disepakati"}.`}
+
+Semoga perjalanan Anda aman, lancar, dan menyenangkan bersama Royal Drive!`
+                  )}
+
+                  {waTemplateType === "return" && (
+`Halo Bapak/Ibu ${selectedWaBooking.client},
+
+Mengingatkan bahwa masa sewa armada ${selectedWaBooking.car} (${selectedWaBooking.carPlate}) akan BERAKHIR HARI INI pukul 18:00 WIB.
+
+Mohon persiapkan unit dan pastikan barang berharga pribadi tidak tertinggal di dalam kendaraan. Jika berencana memperpanjang masa sewa (+Overtime), mohon segera beri tahu kami agar jadwal armada dapat disesuaikan. Terima kasih!`
+                  )}
+
+                  {waTemplateType === "deposit" && (
+`Halo Bapak/Ibu ${selectedWaBooking.client},
+
+Terima kasih telah mempercayakan perjalanan Anda kepada Royal Drive.
+Pemeriksaan fisik unit ${selectedWaBooking.car} dan pengecekan tilang elektronik (ETLE) telah selesai dengan hasil BAIK.
+
+Uang Jaminan Sewa (Deposit): ${formatRupiah(selectedWaBooking.securityDepositAmount || 500000)} telah kami transfer kembali ke rekening Anda.
+
+Sampai jumpa pada perjalanan berikutnya bersama Royal Drive!`
+                  )}
+                </div>
+              </div>
+
+              {/* Send Button */}
+              <div className="flex items-center space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsWaModalOpen(false)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  Tutup
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    let msg = "";
+                    if (waTemplateType === "dp") {
+                      msg = `Halo Bapak/Ibu ${selectedWaBooking.client},\n\nTerima kasih telah melakukan reservasi di Royal Drive Rental Mobil.\nID Booking: ${selectedWaBooking.id}\nUnit: ${selectedWaBooking.car} (${selectedWaBooking.carPlate})\nJadwal: ${selectedWaBooking.startDate} s/d ${selectedWaBooking.endDate} (${selectedWaBooking.durationDays} Hari)\n\nTagihan DP 30%: ${formatRupiah(selectedWaBooking.depositAmount || Math.round(selectedWaBooking.totalPrice * 0.3))}\nRekening BCA: 8820-9918-22 a/n PT ROYAL DRIVE INDONESIA\n\nMohon konfirmasi bukti transfer agar unit terkunci. Terima kasih!`;
+                    } else if (waTemplateType === "ready") {
+                      msg = `Halo Bapak/Ibu ${selectedWaBooking.client},\n\nUnit armada Anda: ${selectedWaBooking.car} (${selectedWaBooking.carPlate}) telah SIAP & BERSIH.\n${selectedWaBooking.rentalType === "Dengan Sopir" ? `Supir Anda: ${selectedWaBooking.driverName || "Driver Resmi"} (${selectedWaBooking.driverPhone || "-"}) siap meluncur.` : `Unit siap diantar/diambil di ${selectedWaBooking.pickupLocation || "Showroom"}.`}\n\nTerima kasih!`;
+                    } else if (waTemplateType === "return") {
+                      msg = `Halo Bapak/Ibu ${selectedWaBooking.client},\n\nMengingatkan bahwa masa sewa armada ${selectedWaBooking.car} (${selectedWaBooking.carPlate}) akan BERAKHIR HARI INI pukul 18:00 WIB. Mohon persiapkan serah terima unit. Terima kasih!`;
+                    } else {
+                      msg = `Halo Bapak/Ibu ${selectedWaBooking.client},\n\nUang jaminan sewa (deposit) untuk unit ${selectedWaBooking.car} telah kami transfer kembali 100%. Terima kasih telah menyewa di Royal Drive!`;
+                    }
+                    const cleanPhone = selectedWaBooking.phone.replace(/\D/g, "");
+                    const targetPhone = cleanPhone.startsWith("0") ? "62" + cleanPhone.slice(1) : cleanPhone;
+                    const url = `https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`;
+                    window.open(url, "_blank");
+                    setIsWaModalOpen(false);
+                  }}
+                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/25"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Buka & Kirim WhatsApp</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
     </div>
   );
