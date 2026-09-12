@@ -710,6 +710,7 @@ export default function AdminDashboard({
   onClose 
 }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<"analytics" | "fleet" | "bookings" | "customers" | "drivers" | "maintenance" | "finance" | "testimonials" | "faqs" | "appearance" | "settings" | "blog">("analytics");
+  const [settingsSubTab, setSettingsSubTab] = useState<"rates" | "contact" | "pricing" | "notif" | "security" | "all">("rates");
   const [bookings, setBookings] = useState<BookingRecord[]>(initialBookings);
 
   // Operational Modals State
@@ -5116,9 +5117,9 @@ export default function AdminDashboard({
 
         {/* TAB 5: Settings */}
         {activeTab === "settings" && (
-          <div className="space-y-6 text-left max-w-6xl">
+          <div className="space-y-6 text-left">
             {/* Header & Quick Save */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 border border-slate-200 rounded-2xl shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 border border-slate-200/90 rounded-2xl shadow-xs">
               <div>
                 <span className="text-[10px] uppercase tracking-widest text-accent font-bold block">
                   System Preferences & Configuration
@@ -5127,7 +5128,7 @@ export default function AdminDashboard({
                   Pengaturan & Konfigurasi Showroom
                 </h2>
                 <p className="text-xs text-slate-500 font-sans mt-0.5">
-                  Konfigurasi kebijakan tarif rental, deposit jaminan, profil showroom, dynamic pricing, dan keamanan sistem.
+                  Pusat kendali kebijakan tarif sewa, profil showroom, dynamic pricing, dan keamanan sistem.
                 </p>
               </div>
 
@@ -5139,566 +5140,672 @@ export default function AdminDashboard({
                 <span>Simpan Pengaturan</span>
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
-              {/* Left Column: Tarif & Aturan */}
-              <div className="space-y-4">
-                <h3 className="font-display font-extrabold text-sm text-slate-800 border-b border-slate-200 pb-2">1. Konfigurasi Tarif & Aturan</h3>
-                <div className="space-y-3 text-xs font-sans">
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-650 font-semibold">Jaminan Deposit Kerusakan (Security Deposit)</label>
+
+            {/* Sub-Navigation Tabs Bar */}
+            <div className="flex items-center space-x-1.5 overflow-x-auto bg-white p-2 border border-slate-200/90 rounded-2xl shadow-xs text-xs font-semibold">
+              {[
+                { id: "rates", label: "Tarif & Ketentuan", icon: <Wallet className="w-3.5 h-3.5" /> },
+                { id: "contact", label: "Kontak & SEO", icon: <Phone className="w-3.5 h-3.5" /> },
+                { id: "pricing", label: "Dynamic Pricing", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+                { id: "notif", label: "Notifikasi & Audio", icon: <Bell className="w-3.5 h-3.5" /> },
+                { id: "security", label: "Keamanan & Backup", icon: <Lock className="w-3.5 h-3.5" /> },
+                { id: "all", label: "Tampilkan Semua", icon: <Sliders className="w-3.5 h-3.5" /> },
+              ].map((sub) => {
+                const isActive = settingsSubTab === sub.id;
+                return (
+                  <button
+                    key={sub.id}
+                    type="button"
+                    onClick={() => setSettingsSubTab(sub.id as any)}
+                    className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl transition-all whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? "bg-slate-900 text-white font-bold shadow-xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    }`}
+                  >
+                    <span className={isActive ? "text-accent" : "text-slate-400"}>{sub.icon}</span>
+                    <span>{sub.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* SECTION 1: TARIF & ATURAN RENTAL */}
+            {(settingsSubTab === "rates" || settingsSubTab === "all") && (
+              <div className="p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-5">
+                <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold">
+                    <Wallet className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-slate-900">1. Konfigurasi Tarif & Aturan Rental</h3>
+                    <p className="text-[11px] text-slate-500">Kebijakan uang jaminan, denda keterlambatan, biaya sopir, dan pajak</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-sans">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                      Jaminan Deposit Kerusakan (IDR)
+                    </label>
                     <input
                       type="number"
                       value={settings.depositAmount}
                       onChange={(e) => setSettings({ ...settings, depositAmount: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
                     />
+                    <span className="text-[10px] text-slate-400">Titipan refundable saat sewa lepas kunci</span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-650 font-semibold">Tarif Overtime / Jam (Late Fee Rate)</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                      Tarif Overtime / Jam (Late Fee)
+                    </label>
                     <input
                       type="number"
                       value={settings.lateFeePerHour}
                       onChange={(e) => setSettings({ ...settings, lateFeePerHour: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
                     />
+                    <span className="text-[10px] text-slate-400">Denda jika unit lewat batas jam kembali</span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Tarif Jasa Sopir Harian (Driver rate)</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                      Tarif Jasa Sopir Harian (IDR)
+                    </label>
                     <input
                       type="number"
                       value={settings.driverServiceRate}
                       onChange={(e) => setSettings({ ...settings, driverServiceRate: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
                     />
+                    <span className="text-[10px] text-slate-400">Biaya per hari untuk tipe Dengan Sopir</span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Pajak Negara PPN (%)</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                      Pajak Negara PPN (%)
+                    </label>
                     <input
                       type="number"
                       value={settings.taxRate}
                       onChange={(e) => setSettings({ ...settings, taxRate: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
                     />
+                    <span className="text-[10px] text-slate-400">PPN (isi 0 jika harga sudah include pajak)</span>
                   </div>
+                </div>
 
-                  <div className="space-y-1 pt-2 border-t border-slate-200/50">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Template Pesan WhatsApp Order</label>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2 border-t border-slate-100 text-xs font-sans">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                      Template Pesan WhatsApp Order
+                    </label>
                     <textarea
                       value={whatsappTemplate}
                       onChange={(e) => setWhatsappTemplate(e.target.value)}
                       placeholder="Contoh: Halo Gino Rent Car, saya tertarik sewa mobil [Nama Mobil]..."
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent h-20 resize-none"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors h-24 resize-none leading-relaxed"
                     />
+                    <span className="text-[10px] text-slate-400">Format pesan pembuka saat pelanggan mengklik tombol WhatsApp mobil</span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Syarat & Ketentuan Sewa (Pisahkan dengan Baris Baru)</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                      Syarat & Ketentuan Sewa (Pisahkan dengan Baris Baru)
+                    </label>
                     <textarea
                       value={rentalTerms}
                       onChange={(e) => setRentalTerms(e.target.value)}
                       placeholder="Masukkan syarat sewa (satu poin per baris)..."
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent h-24"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors h-24 leading-relaxed"
                     />
+                    <span className="text-[10px] text-slate-400">Poin persyaratan yang tampil pada formulir booking penyewa</span>
                   </div>
                 </div>
               </div>
+            )}
 
-              {/* Right Column: Kontak & Media Sosial */}
-              <div className="space-y-4">
-                <h3 className="font-display font-extrabold text-sm text-slate-800 border-b border-slate-200 pb-2">2. Informasi Kontak & Media Sosial</h3>
-                <div className="space-y-3 text-xs font-sans">
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-650 font-semibold">Nomor WhatsApp CS (Tanpa +, Contoh: 6281234567890)</label>
-                    <input
-                      type="text"
-                      value={whatsappNumber}
-                      onChange={(e) => setWhatsappNumber(e.target.value)}
-                      placeholder="Contoh: 6281234567890"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
+            {/* SECTION 2: KONTAK SHOWROOM & SEO */}
+            {(settingsSubTab === "contact" || settingsSubTab === "all") && (
+              <div className="p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-5">
+                <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold">
+                    <Phone className="w-4 h-4" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-650 font-semibold">Hotline CS Telepon</label>
-                    <input
-                      type="text"
-                      value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value)}
-                      placeholder="Contoh: +62 21-8080-9999"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-650 font-semibold">Email Support</label>
-                    <input
-                      type="email"
-                      value={contactEmail}
-                      onChange={(e) => setContactEmail(e.target.value)}
-                      placeholder="Contoh: support@domain.com"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-650 font-semibold">Alamat Lengkap Showroom (Teks)</label>
-                    <textarea
-                      value={showroomAddress}
-                      onChange={(e) => setShowroomAddress(e.target.value)}
-                      placeholder="Masukkan alamat showroom pusat (Teks)"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent h-20 resize-none"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-650 font-semibold">Kode Embed Google Maps (Iframe / Link)</label>
-                    <textarea
-                      value={googleMapsLink}
-                      onChange={(e) => setGoogleMapsLink(e.target.value)}
-                      placeholder="Masukkan kode <iframe src='...'></iframe> atau link Google Maps"
-                      className="w-full bg-white border border-slate-200 text-slate-850 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent h-24 resize-none"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-650 font-semibold">Link Instagram</label>
-                    <input
-                      type="text"
-                      value={instagramUrl}
-                      onChange={(e) => setInstagramUrl(e.target.value)}
-                      placeholder="https://instagram.com/username"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Link TikTok</label>
-                    <input
-                      type="text"
-                      value={tiktokUrl}
-                      onChange={(e) => setTiktokUrl(e.target.value)}
-                      placeholder="https://tiktok.com/@username"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Link Facebook</label>
-                    <input
-                      type="text"
-                      value={facebookUrl}
-                      onChange={(e) => setFacebookUrl(e.target.value)}
-                      placeholder="https://facebook.com/username"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
-                  </div>
-
-                  <div className="space-y-1 pt-2 border-t border-slate-200/50">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">SEO Title (Browser Tab Title)</label>
-                    <input
-                      type="text"
-                      value={seoTitle}
-                      onChange={(e) => setSeoTitle(e.target.value)}
-                      placeholder="Contoh: Gino Rent Car | Sewa Mobil Cisoka"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">SEO Meta Description</label>
-                    <textarea
-                      value={seoDescription}
-                      onChange={(e) => setSeoDescription(e.target.value)}
-                      placeholder="Masukkan deskripsi singkat pencarian Google..."
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent h-16 resize-none"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">SEO Meta Keywords (Pisahkan dengan Koma)</label>
-                    <input
-                      type="text"
-                      value={seoKeywords}
-                      onChange={(e) => setSeoKeywords(e.target.value)}
-                      placeholder="Contoh: rental mobil cisoka, sewa alphard tangerang"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-slate-900">2. Informasi Kontak Showroom & SEO Google</h3>
+                    <p className="text-[11px] text-slate-500">Nomor kontak resmi CS, alamat pool, tautan medsos, dan optimasi mesin pencari</p>
                   </div>
                 </div>
-              </div>
 
-            </div>
-
-            {/* 3. Aturan Tarif Musiman & Akhir Pekan (Dynamic Peak Season) */}
-            <div className="pt-6 border-t border-slate-200 mt-6 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <span className="text-[10px] uppercase tracking-widest text-accent font-semibold block">Dynamic Pricing Engine</span>
-                  <h3 className="font-display font-extrabold text-sm text-slate-800">3. Aturan Tarif Musiman & Akhir Pekan (Peak Season Surcharge)</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Penyesuaian tarif otomatis saat akhir pekan (Sabtu & Minggu) atau musim libur tinggi (Mudik Lebaran, Nataru, Libur Sekolah).
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleOpenAddSeason}
-                  className="inline-flex items-center space-x-1.5 bg-accent hover:bg-accent-hover text-white text-[10px] font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shadow-sm cursor-pointer self-start sm:self-auto"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>+ Tambah Musim Libur</span>
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-2">
-                {pricingSeasons.map((season) => (
-                  <div 
-                    key={season.id} 
-                    className={`p-4 rounded-2xl border transition-all ${
-                      season.isActive 
-                        ? "bg-white border-amber-300 shadow-sm" 
-                        : "bg-slate-100/70 border-slate-200 opacity-60"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="flex items-center space-x-1.5">
-                          <span className={`w-2 h-2 rounded-full ${season.isActive ? "bg-amber-500 animate-pulse" : "bg-slate-400"}`} />
-                          <h4 className="font-display font-bold text-xs text-slate-800">{season.name}</h4>
-                        </div>
-                        <span className="text-[9px] text-slate-400 font-mono block mt-0.5">
-                          {season.type === "weekend" ? "Otomatis setiap Sabtu & Minggu" : `${season.startDate} s/d ${season.endDate}`}
-                        </span>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={season.isActive}
-                          onChange={() => handleToggleSeason(season.id)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-600" />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs font-sans">
+                  {/* Left Column: Kontak & Alamat */}
+                  <div className="space-y-3.5">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        Nomor WhatsApp CS (Tanpa +, Contoh: 6281234567890)
                       </label>
+                      <input
+                        type="text"
+                        value={whatsappNumber}
+                        onChange={(e) => setWhatsappNumber(e.target.value)}
+                        placeholder="Contoh: 6281234567890"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                      />
                     </div>
 
-                    <p className="text-[10px] text-slate-500 mt-2 line-clamp-2">
-                      {season.description}
-                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                          Hotline CS Telepon
+                        </label>
+                        <input
+                          type="text"
+                          value={contactPhone}
+                          onChange={(e) => setContactPhone(e.target.value)}
+                          placeholder="Contoh: +62 21-8080-9999"
+                          className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                          Email Support Showroom
+                        </label>
+                        <input
+                          type="email"
+                          value={contactEmail}
+                          onChange={(e) => setContactEmail(e.target.value)}
+                          placeholder="Contoh: support@royaldrive.com"
+                          className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                        />
+                      </div>
+                    </div>
 
-                    <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-[10px] text-slate-500 font-medium">Kenaikan:</span>
-                        <div className="flex items-center space-x-1">
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={season.surchargePercent}
-                            onChange={(e) => handleUpdateSeasonPercent(season.id, Number(e.target.value))}
-                            className="w-14 bg-slate-50 border border-slate-200 text-center font-bold text-xs text-amber-700 py-0.5 rounded-lg focus:outline-none focus:border-amber-500"
-                          />
-                          <span className="text-xs font-bold text-amber-700">%</span>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        Alamat Lengkap Showroom (Teks)
+                      </label>
+                      <textarea
+                        value={showroomAddress}
+                        onChange={(e) => setShowroomAddress(e.target.value)}
+                        placeholder="Masukkan alamat showroom pusat..."
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors h-18 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        Kode Embed Google Maps (Iframe / Link)
+                      </label>
+                      <textarea
+                        value={googleMapsLink}
+                        onChange={(e) => setGoogleMapsLink(e.target.value)}
+                        placeholder="Masukkan kode <iframe src='...'></iframe> atau link Google Maps"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors h-18 resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right Column: Medsos & SEO */}
+                  <div className="space-y-3.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block truncate">
+                          Instagram URL
+                        </label>
+                        <input
+                          type="text"
+                          value={instagramUrl}
+                          onChange={(e) => setInstagramUrl(e.target.value)}
+                          placeholder="https://instagram.com/..."
+                          className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3 py-2 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block truncate">
+                          TikTok URL
+                        </label>
+                        <input
+                          type="text"
+                          value={tiktokUrl}
+                          onChange={(e) => setTiktokUrl(e.target.value)}
+                          placeholder="https://tiktok.com/@..."
+                          className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3 py-2 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block truncate">
+                          Facebook URL
+                        </label>
+                        <input
+                          type="text"
+                          value={facebookUrl}
+                          onChange={(e) => setFacebookUrl(e.target.value)}
+                          placeholder="https://facebook.com/..."
+                          className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3 py-2 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 pt-1">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        SEO Title (Browser Tab Title)
+                      </label>
+                      <input
+                        type="text"
+                        value={seoTitle}
+                        onChange={(e) => setSeoTitle(e.target.value)}
+                        placeholder="Contoh: Royal Drive | Sewa Mobil Mewah & Lepas Kunci Cisoka"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        SEO Meta Description
+                      </label>
+                      <textarea
+                        value={seoDescription}
+                        onChange={(e) => setSeoDescription(e.target.value)}
+                        placeholder="Masukkan deskripsi singkat pencarian Google..."
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors h-16 resize-none"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        SEO Meta Keywords (Pisahkan dengan Koma)
+                      </label>
+                      <input
+                        type="text"
+                        value={seoKeywords}
+                        onChange={(e) => setSeoKeywords(e.target.value)}
+                        placeholder="Contoh: rental mobil cisoka, sewa alphard tangerang"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                      />
+                    </div>
+
+                    {/* Google Snippet Simulator */}
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                        Pratinjau Hasil Pencarian Google:
+                      </span>
+                      <div className="text-left font-sans">
+                        <span className="text-[10px] text-emerald-700 block truncate">https://royaldrive.id</span>
+                        <h4 className="text-xs text-blue-800 font-bold hover:underline cursor-pointer truncate">
+                          {seoTitle || "Royal Drive | Rental Mobil Mewah & Lepas Kunci Cisoka"}
+                        </h4>
+                        <p className="text-[10px] text-slate-600 line-clamp-2 mt-0.5 leading-relaxed">
+                          {seoDescription || "Layanan sewa mobil mewah terlengkap di Cisoka dan Tangerang. Unit bersih, wangi, siap jalan dengan tarif kompetitif."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 3: DYNAMIC PRICING (PEAK SEASON SURCHARGE) */}
+            {(settingsSubTab === "pricing" || settingsSubTab === "all") && (
+              <div className="p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold">
+                      <TrendingUp className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-sm text-slate-900">
+                        3. Aturan Tarif Musiman & Akhir Pekan (Dynamic Peak Season)
+                      </h3>
+                      <p className="text-[11px] text-slate-500">
+                        Kenaikan tarif sewa otomatis saat weekend atau musim liburan tinggi (Lebaran, Nataru, Libur Sekolah)
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenAddSeason}
+                    className="inline-flex items-center space-x-1.5 bg-accent hover:bg-accent-hover text-white text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shadow-xs cursor-pointer self-start sm:self-auto"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Tambah Musim Libur</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {pricingSeasons.map((season) => (
+                    <div 
+                      key={season.id} 
+                      className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
+                        season.isActive 
+                          ? "bg-amber-50/40 border-amber-200 shadow-2xs" 
+                          : "bg-slate-50 border-slate-200 opacity-60"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center space-x-1.5">
+                              <span className={`w-2 h-2 rounded-full ${season.isActive ? "bg-amber-500 animate-pulse" : "bg-slate-400"}`} />
+                              <h4 className="font-display font-bold text-xs text-slate-900 truncate">{season.name}</h4>
+                            </div>
+                            <span className="text-[10px] text-slate-500 font-mono block mt-0.5">
+                              {season.type === "weekend" ? "Otomatis setiap Sabtu & Minggu" : `${season.startDate} s/d ${season.endDate}`}
+                            </span>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={season.isActive}
+                              onChange={() => handleToggleSeason(season.id)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-600" />
+                          </label>
                         </div>
+
+                        <p className="text-[11px] text-slate-600 mt-2 line-clamp-2 leading-relaxed">
+                          {season.description}
+                        </p>
                       </div>
 
-                      <div className="flex items-center space-x-1">
-                        {season.type !== "weekend" && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingSeason(season);
-                              setSeasonName(season.name);
-                              setSeasonType(season.type);
-                              setSeasonStart(season.startDate || "");
-                              setSeasonEnd(season.endDate || "");
-                              setSeasonPercent(season.surchargePercent);
-                              setSeasonDesc(season.description || "");
-                              setIsSeasonModalOpen(true);
-                            }}
-                            className="p-1 hover:bg-slate-100 text-slate-500 hover:text-slate-800 rounded transition-colors cursor-pointer"
-                            title="Edit Periode Musim"
-                          >
-                            <Edit className="w-3 h-3" />
-                          </button>
-                        )}
-                        {season.id.startsWith("season-") && season.type !== "weekend" && (
+                      <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Kenaikan:</span>
+                          <div className="flex items-center space-x-1">
+                            <input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={season.surchargePercent}
+                              onChange={(e) => handleUpdateSeasonPercent(season.id, Number(e.target.value))}
+                              className="w-14 bg-white border border-slate-200 text-center font-bold text-xs text-amber-800 py-1 rounded-lg focus:outline-none focus:border-amber-500"
+                            />
+                            <span className="text-xs font-bold text-amber-800">%</span>
+                          </div>
+                        </div>
+
+                        {season.id !== "weekend-default" && (
                           <button
                             type="button"
                             onClick={() => handleDeleteSeason(season.id)}
-                            className="p-1 hover:bg-red-50 text-slate-400 hover:text-red-600 rounded transition-colors cursor-pointer"
-                            title="Hapus Aturan"
+                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            title="Hapus Musim Libur"
                           >
-                            <Trash className="w-3 h-3" />
+                            <Trash className="w-3.5 h-3.5" />
                           </button>
                         )}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 4. Cadangkan & Pulihkan Database Showroom (Backup & Restore .JSON) */}
-            <div className="pt-6 border-t border-slate-200 mt-6 space-y-4 text-left">
-              <div>
-                <span className="text-[10px] uppercase tracking-widest text-accent font-semibold block">Data Resilience & Disaster Recovery</span>
-                <h3 className="font-display font-extrabold text-sm text-slate-800">4. Cadangkan & Pulihkan Database Showroom (1-Click JSON Backup & Restore)</h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Simpan salinan seluruh database showroom (daftar armada, riwayat booking, data sopir, servis, buku kas keuangan, ulasan, hingga logo) ke dalam satu file berkas JSON untuk perlindungan data anti-hilang.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                {/* Export Card */}
-                <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between space-y-3">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center shrink-0">
-                      <Database className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-display font-bold text-xs text-slate-800">Ekspor Salinan Database (.JSON)</h4>
-                      <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                        Unduh file cadangan offline ke komputer atau flashdisk Anda. Sangat aman dan bisa dipindahkan antar perangkat/browser.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleExportFullBackup}
-                    className="w-full inline-flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-display font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>Download Database Showroom</span>
-                  </button>
-                </div>
-
-                {/* Import Card */}
-                <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between space-y-3">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
-                      <UploadCloud className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-display font-bold text-xs text-slate-800">Pulihkan / Impor Database (.JSON)</h4>
-                      <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                        Unggah file cadangan JSON yang pernah Anda unduh sebelumnya untuk merestorasi seluruh data kembali ke kondisi tersebut.
-                      </p>
-                    </div>
-                  </div>
-                  <label className="w-full inline-flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-display font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all shadow-sm cursor-pointer">
-                    <RefreshCw className="w-4 h-4" />
-                    <span>Pilih Berkas JSON untuk Dipulihkan</span>
-                    <input
-                      type="file"
-                      accept=".json"
-                      onChange={handleImportFullBackup}
-                      className="hidden"
-                    />
-                  </label>
+                  ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* 5. Keamanan & Kredensial Administrator (Ganti Password) */}
-            <div className="pt-6 border-t border-slate-200 mt-6 space-y-4 text-left">
-              <div>
-                <span className="text-[10px] uppercase tracking-widest text-accent font-semibold block">Super Admin Security</span>
-                <h3 className="font-display font-extrabold text-sm text-slate-800">5. Keamanan & Kredensial Administrator (Ganti Password)</h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Ubah password akun Administrator untuk mencegah akses pihak yang tidak berwenang ke panel kendali ini.
-                </p>
-              </div>
-
-              <form onSubmit={handleChangeAdminPassword} className="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 max-w-2xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-500 font-bold flex items-center space-x-1">
-                      <Lock className="w-3 h-3 text-slate-400" />
-                      <span>Email Administrator</span>
-                    </label>
-                    <input
-                      type="email"
-                      value={adminEmailSetting}
-                      onChange={(e) => setAdminEmailSetting(e.target.value)}
-                      required
-                      placeholder="admin@royaldrive.com"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
+            {/* SECTION 4: NOTIFIKASI REAL-TIME & SUARA BEL */}
+            {(settingsSubTab === "notif" || settingsSubTab === "all") && (
+              <div className="p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-5">
+                <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center font-bold">
+                    <Bell className="w-4 h-4" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-500 font-bold flex items-center space-x-1">
-                      <Key className="w-3 h-3 text-slate-400" />
-                      <span>Password Saat Ini</span>
-                    </label>
-                    <input
-                      type="password"
-                      value={currAdminPass}
-                      onChange={(e) => setCurrAdminPass(e.target.value)}
-                      required
-                      placeholder="Masukkan password lama"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-slate-900">
+                      4. Pengaturan Notifikasi Booking Masuk & Suara Bel
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Konfigurasi alarm audio chime dan push notifikasi desktop browser saat pelanggan memesan mobil
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Password Baru</label>
-                    <input
-                      type="password"
-                      value={newAdminPass}
-                      onChange={(e) => setNewAdminPass(e.target.value)}
-                      required
-                      placeholder="Minimal 5 karakter"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Konfirmasi Password Baru</label>
-                    <input
-                      type="password"
-                      value={confirmAdminPass}
-                      onChange={(e) => setConfirmAdminPass(e.target.value)}
-                      required
-                      placeholder="Ketik ulang password baru"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2 flex justify-start">
-                  <button
-                    type="submit"
-                    className="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all shadow-sm cursor-pointer"
-                  >
-                    <Key className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Perbarui Password Administrator</span>
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* 6. Pengaturan Notifikasi Real-Time & Suara Bel */}
-            <div className="pt-6 border-t border-slate-200 mt-6 space-y-4 text-left">
-              <div>
-                <span className="text-[10px] uppercase tracking-widest text-accent font-semibold block">Real-time Order Alerts</span>
-                <h3 className="font-display font-extrabold text-sm text-slate-800">6. Pengaturan Notifikasi Booking Masuk & Suara Bel</h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Konfigurasi alarm audio chime, push notifikasi desktop browser, dan pemberitahuan pesanan masuk baru secara real-time.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                {/* Audio Chime Card */}
-                <div className="p-5 bg-white border border-slate-200 rounded-2xl flex flex-col justify-between space-y-4 shadow-sm">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
-                      {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-display font-bold text-xs text-slate-800">Suara Bel Notifikasi (Audio Chime)</h4>
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                          soundEnabled ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
-                        }`}>
-                          {soundEnabled ? "Aktif" : "Bisu"}
-                        </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+                  {/* Audio Chime Card */}
+                  <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+                        {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                        Memainkan nada 3-akord mewah saat pelanggan menyelesaikan formulir verifikasi booking di halaman web.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-2 pt-2 border-t border-slate-100">
-                    <button
-                      type="button"
-                      onClick={toggleSound}
-                      className={`flex-1 text-xs font-bold py-2.5 px-3 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
-                        soundEnabled
-                          ? "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                          : "bg-accent hover:bg-accent-hover text-white shadow-sm"
-                      }`}
-                    >
-                      {soundEnabled ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                      <span>{soundEnabled ? "Nonaktifkan Suara" : "Aktifkan Suara Bel"}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleTestSound}
-                      className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all shadow-sm cursor-pointer flex items-center space-x-1.5"
-                    >
-                      <Volume2 className="w-4 h-4" />
-                      <span>Uji Suara</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Desktop Push Notification Card */}
-                <div className="p-5 bg-white border border-slate-200 rounded-2xl flex flex-col justify-between space-y-4 shadow-sm">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
-                      <Bell className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-display font-bold text-xs text-slate-800">Push Notifikasi Desktop (OS Level)</h4>
-                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                          desktopNotifState === "granted"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : desktopNotifState === "denied"
-                            ? "bg-rose-50 text-rose-700 border border-rose-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
-                        }`}>
-                          {desktopNotifState === "granted" ? "Diizinkan ✅" : desktopNotifState === "denied" ? "Diblokir ❌" : "Belum Aktif ⚠️"}
-                        </span>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-display font-bold text-xs text-slate-900">Suara Bel Notifikasi (Audio Chime)</h4>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                            soundEnabled ? "bg-emerald-100 text-emerald-800" : "bg-slate-200 text-slate-600"
+                          }`}>
+                            {soundEnabled ? "Aktif" : "Bisu"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                          Memainkan nada 3-akord mewah saat pelanggan menyelesaikan formulir verifikasi booking di halaman web.
+                        </p>
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                        Banner pop-up sistem operasi (Windows/Mac) tetap muncul di layar meskipun tab browser Anda sedang di-minimize atau Anda sedang membuka tab lain.
-                      </p>
                     </div>
-                  </div>
 
-                  <div className="pt-2 border-t border-slate-100">
-                    {desktopNotifState === "granted" ? (
+                    <div className="flex items-center space-x-2 pt-3 border-t border-slate-200/60">
                       <button
                         type="button"
-                        onClick={() => {
-                          sendDesktopNotification("🔔 Uji Coba Berhasil!", "Sistem notifikasi booking Royal Drive terhubung aktif dengan browser Anda.");
-                        }}
-                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 px-3 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+                        onClick={toggleSound}
+                        className={`flex-1 text-xs font-bold py-2 px-3 rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5 ${
+                          soundEnabled
+                            ? "bg-slate-200 hover:bg-slate-300 text-slate-800"
+                            : "bg-accent hover:bg-accent-hover text-white shadow-xs"
+                        }`}
                       >
-                        <Bell className="w-4 h-4 text-emerald-600" />
-                        <span>Kirim Notifikasi Uji Coba</span>
+                        {soundEnabled ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                        <span>{soundEnabled ? "Nonaktifkan Suara" : "Aktifkan Bel"}</span>
                       </button>
-                    ) : desktopNotifState === "denied" ? (
-                      <div className="text-[11px] text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-center font-medium">
-                        Izin notifikasi diblokir di browser. Klik ikon gembok di sebelah kiri address bar browser untuk mengubah izin ke "Allow".
-                      </div>
-                    ) : (
                       <button
                         type="button"
-                        onClick={handleRequestDesktopPush}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow-sm cursor-pointer flex items-center justify-center space-x-1.5"
+                        onClick={handleTestSound}
+                        className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2 px-3.5 rounded-xl transition-all shadow-xs cursor-pointer flex items-center space-x-1.5"
                       >
-                        <Bell className="w-4 h-4" />
-                        <span>Aktifkan Izin Notifikasi Desktop</span>
+                        <Volume2 className="w-3.5 h-3.5" />
+                        <span>Uji Suara</span>
                       </button>
-                    )}
+                    </div>
+                  </div>
+
+                  {/* Desktop Push Notification Card */}
+                  <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
+                        <Bell className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-display font-bold text-xs text-slate-900">Push Notifikasi Desktop (OS Level)</h4>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                            desktopNotifState === "granted"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : desktopNotifState === "denied"
+                              ? "bg-rose-100 text-rose-800"
+                              : "bg-amber-100 text-amber-800"
+                          }`}>
+                            {desktopNotifState === "granted" ? "Diizinkan" : desktopNotifState === "denied" ? "Diblokir" : "Belum Aktif"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                          Menampilkan banner notifikasi resmi di pojok kanan bawah desktop laptop/PC Anda saat ada pesanan baru.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-200/60">
+                      {desktopNotifState === "granted" ? (
+                        <div className="text-[11px] text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 text-center font-semibold">
+                          Push notifikasi desktop aktif. Anda akan menerima notifikasi bahkan saat tab admin terminimize.
+                        </div>
+                      ) : desktopNotifState === "denied" ? (
+                        <div className="text-[11px] text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-center font-medium">
+                          Izin notifikasi diblokir di browser. Klik ikon gembok di sebelah address bar browser untuk mengubah izin ke "Allow".
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleRequestDesktopPush}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow-xs cursor-pointer flex items-center justify-center space-x-1.5"
+                        >
+                          <Bell className="w-4 h-4" />
+                          <span>Aktifkan Izin Notifikasi Desktop</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Save Button */}
-            <div className="pt-4 border-t border-slate-200/60 mt-4 flex justify-end">
+            {/* SECTION 5: KEAMANAN & BACKUP DATABASE */}
+            {(settingsSubTab === "security" || settingsSubTab === "all") && (
+              <div className="p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-5">
+                <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-sm text-slate-900">
+                      5. Keamanan Akun Administrator & Cadangan Database Showroom
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Ekspor/impor seluruh data booking & armada, serta perbarui password akses Super Administrator
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs font-sans">
+                  {/* Backup & Restore Column */}
+                  <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center space-x-2.5 mb-2">
+                        <Database className="w-4 h-4 text-accent" />
+                        <h4 className="font-display font-bold text-xs text-slate-900">Pencadangan & Pemulihan Database (.JSON)</h4>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                        Unduh salinan offline seluruh data booking, pelanggan, armada, ulasan, dan pengaturan ke komputer Anda. File ini dapat dipulihkan kapan saja di perangkat apa pun.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2.5 pt-3 border-t border-slate-200/60">
+                      <button
+                        type="button"
+                        onClick={handleExportFullBackup}
+                        className="w-full inline-flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-display font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all shadow-xs cursor-pointer"
+                      >
+                        <Download className="w-4 h-4 text-amber-400" />
+                        <span>Download Cadangan Database (.JSON)</span>
+                      </button>
+
+                      <label className="w-full inline-flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-display font-bold uppercase tracking-wider py-2.5 rounded-xl transition-all shadow-xs cursor-pointer">
+                        <RefreshCw className="w-4 h-4" />
+                        <span>Pilih File JSON untuk Dipulihkan</span>
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={handleImportFullBackup}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Password Form Column */}
+                  <form onSubmit={handleChangeAdminPassword} className="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3.5">
+                    <div className="flex items-center space-x-2.5 mb-1">
+                      <Key className="w-4 h-4 text-accent" />
+                      <h4 className="font-display font-bold text-xs text-slate-900">Perbarui Kredensial Super Admin</h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                          Email Administrator
+                        </label>
+                        <input
+                          type="email"
+                          value={adminEmailSetting}
+                          onChange={(e) => setAdminEmailSetting(e.target.value)}
+                          required
+                          placeholder="admin@royaldrive.com"
+                          className="w-full bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                          Password Saat Ini
+                        </label>
+                        <input
+                          type="password"
+                          value={currAdminPass}
+                          onChange={(e) => setCurrAdminPass(e.target.value)}
+                          required
+                          placeholder="Password lama"
+                          className="w-full bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                          Password Baru
+                        </label>
+                        <input
+                          type="password"
+                          value={newAdminPass}
+                          onChange={(e) => setNewAdminPass(e.target.value)}
+                          required
+                          placeholder="Min. 5 karakter"
+                          className="w-full bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                          Konfirmasi Password
+                        </label>
+                        <input
+                          type="password"
+                          value={confirmAdminPass}
+                          onChange={(e) => setConfirmAdminPass(e.target.value)}
+                          required
+                          placeholder="Ketik ulang password"
+                          className="w-full bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex justify-start">
+                      <button
+                        type="submit"
+                        className="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-display font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-xs cursor-pointer"
+                      >
+                        <Key className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Perbarui Password</span>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Save Bar */}
+            <div className="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center space-x-2 text-slate-500 text-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Pengaturan yang disimpan akan langsung aktif secara realtime di seluruh sistem showroom.</span>
+              </div>
               <button
                 onClick={handleSaveSettings}
-                className="bg-accent hover:bg-accent-hover text-white font-display font-bold text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-xl transition-all cursor-pointer shadow-lg shadow-accent/15 focus:outline-none"
+                className="w-full sm:w-auto bg-accent hover:bg-accent-hover text-white font-display font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all cursor-pointer shadow-md shadow-accent/20 focus:outline-none flex items-center justify-center space-x-2"
               >
-                Simpan Konfigurasi & Kontak
+                <Check className="w-4 h-4" />
+                <span>Simpan Semua Pengaturan</span>
               </button>
             </div>
           </div>
-        )}
-
-        {/* TAB 6: Kelola Testimoni */}
+        )}{/* TAB 6: Kelola Testimoni */}
         {activeTab === "testimonials" && (
           <div className="space-y-6">
             <div className="flex justify-between items-center text-left">
@@ -5827,122 +5934,232 @@ export default function AdminDashboard({
         {/* TAB 8.5: Kelola Tampilan */}
         {activeTab === "appearance" && (
           <div className="space-y-8 text-left">
-            <div className="border-b border-slate-200 pb-4">
-              <h3 className="font-display font-extrabold text-xl text-slate-800">Kelola Tampilan & Banner Utama</h3>
-              <span className="text-xs text-slate-500 font-medium">Ubah konten banner hero dan latar belakang gambar utama website secara realtime</span>
-            </div>
+            {/* Header with Title & Action Buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-accent font-bold block">
+                  Branding & Visual Presentation
+                </span>
+                <h2 className="font-display font-black text-2xl md:text-3xl text-slate-900">
+                  Kelola Tampilan & Banner Showroom
+                </h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
+                  Sesuaikan teks sambutan hero, logo identitas showroom, dan galeri latar belakang bergerak secara realtime.
+                </p>
+              </div>
 
-            {/* Hero Text Settings */}
-            <div className="bg-slate-50 border border-slate-200 p-6 md:p-8 rounded-3xl space-y-4 max-w-2xl">
-              <h4 className="font-display font-bold text-sm text-slate-800">1. Teks Overlay Banner Hero</h4>
-              <div className="space-y-3 font-sans text-xs">
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Judul Banner Utama (Hero Title)</label>
-                  <input
-                    type="text"
-                    value={heroTitle}
-                    onChange={(e) => setHeroTitle(e.target.value)}
-                    className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    required
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Sub-judul Banner Utama (Hero Subtitle)</label>
-                  <textarea
-                    rows={3}
-                    value={heroSubtitle}
-                    onChange={(e) => setHeroSubtitle(e.target.value)}
-                    className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    required
-                  />
-                </div>
+              <div className="flex items-center space-x-2.5 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={handleResetAppearance}
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all border border-slate-200 cursor-pointer flex items-center space-x-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Reset Default</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAppearance}
+                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-accent/20 cursor-pointer flex items-center space-x-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Simpan Perubahan Tampilan</span>
+                </button>
               </div>
             </div>
 
-            {/* Website Branding Settings */}
-            <div className="bg-slate-50 border border-slate-200 p-6 md:p-8 rounded-3xl space-y-4 max-w-2xl">
-              <h4 className="font-display font-bold text-sm text-slate-800">1.5. Branding Website (Nama & Logo)</h4>
-              <div className="space-y-3 font-sans text-xs">
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold">Nama Website / Brand</label>
-                  <input
-                    type="text"
-                    value={brandName}
-                    onChange={(e) => setBrandName(e.target.value)}
-                    className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
-                    required
-                  />
-                </div>
-                <div className="space-y-3 pt-2 border-t border-slate-200/60">
-                  <span className="font-display font-semibold text-[10px] text-slate-500 uppercase tracking-wider block">Gambar Logo Website</span>
-                  
-                  {/* File Upload Option */}
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold block mb-1">Pilih File Logo (Upload)</label>
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            try {
-                              const compressed = await compressImage(file, 400, 400, 0.8);
-                              setLogoUrl(compressed);
-                            } catch (err) {
-                              console.error(err);
-                              alert("Gagal memproses gambar logo.");
-                            }
-                          }
-                        }}
-                        className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-display file:font-bold file:uppercase file:tracking-wider file:bg-accent file:text-white hover:file:bg-accent-hover cursor-pointer"
-                      />
+            {/* 2-Column Grid: Hero Text & Logo Showroom */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column (7 cols): Hero Text */}
+              <div className="lg:col-span-7 p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-sm text-slate-900">1. Teks Overlay Banner Hero</h3>
+                      <p className="text-[11px] text-slate-500">Judul dan sub-judul utama di halaman depan</p>
                     </div>
                   </div>
+                </div>
 
-                  {/* URL Option */}
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest text-slate-655 font-bold block">Atau Gunakan URL Gambar Logo</label>
+                <div className="space-y-4 text-xs font-sans">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                      Judul Banner Utama (Hero Title)
+                    </label>
                     <input
                       type="text"
-                      value={logoUrl}
-                      onChange={(e) => setLogoUrl(e.target.value)}
-                      placeholder="Contoh: https://domain.com/logo.png"
-                      className="w-full bg-white border border-slate-200 text-slate-800 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent"
+                      value={heroTitle}
+                      onChange={(e) => setHeroTitle(e.target.value)}
+                      placeholder="Contoh: Sewa Mobil Mewah & Lepas Kunci Tangerang"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                      required
                     />
                   </div>
 
-                  <span className="text-[10px] text-slate-400 block mt-1">Kosongkan kolom di atas jika ingin menggunakan logo lencana premium standar bawaan.</span>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                      Sub-judul Banner Utama (Hero Subtitle)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={heroSubtitle}
+                      onChange={(e) => setHeroSubtitle(e.target.value)}
+                      placeholder="Masukkan deskripsi singkat daya tarik armada dan layanan showroom..."
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors resize-none"
+                      required
+                    />
+                  </div>
 
-                  {/* Preview Logo */}
-                  {logoUrl && (
-                    <div className="mt-3 p-3 bg-white border border-slate-250 rounded-2xl inline-block text-left shadow-sm">
-                      <span className="text-[8px] text-slate-400 uppercase tracking-wider block mb-2 font-display font-bold">Pratinjau Logo Aktif</span>
-                      <div className="flex items-center space-x-3 bg-slate-100 p-2.5 rounded-xl border border-slate-200">
-                        <img src={logoUrl} className="h-10 max-w-[120px] object-contain" alt="Preview Logo" />
-                        <button
-                          onClick={() => setLogoUrl("")}
-                          className="text-[9px] text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 rounded-lg transition-colors font-bold uppercase tracking-wider focus:outline-none cursor-pointer"
-                        >
-                          Hapus Logo
-                        </button>
+                  {/* Live Realistic Preview Box */}
+                  <div className="pt-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                      Pratinjau Tampilan Di Website:
+                    </span>
+                    <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-left relative overflow-hidden shadow-inner">
+                      <div className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[9px] font-bold uppercase tracking-wider mb-2">
+                        <span>Royal Fleet Experience</span>
+                      </div>
+                      <h4 className="font-display font-black text-sm md:text-base text-white leading-tight">
+                        {heroTitle || "Sewa Mobil Mewah & Lepas Kunci Tangerang"}
+                      </h4>
+                      <p className="text-[11px] text-slate-300 mt-1 line-clamp-2 leading-relaxed">
+                        {heroSubtitle || "Armada terlengkap, unit prima terawat, harga transparan, dan sopir profesional berpengalaman."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column (5 cols): Logo & Brand Identity */}
+              <div className="lg:col-span-5 p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-4 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold">
+                      <Image className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-sm text-slate-900">2. Identitas Brand & Logo</h3>
+                      <p className="text-[11px] text-slate-500">Logo resmi showroom pada navbar & nota</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 text-xs font-sans">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        Nama Brand Showroom
+                      </label>
+                      <input
+                        type="text"
+                        value={brandName}
+                        onChange={(e) => setBrandName(e.target.value)}
+                        placeholder="Contoh: ROYAL DRIVE"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        Upload Berkas Logo (PNG / JPG / SVG)
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <label className="flex-1 flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 px-4 rounded-xl cursor-pointer transition-all shadow-xs">
+                          <UploadCloud className="w-4 h-4 text-amber-400" />
+                          <span>Pilih Berkas Logo</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                try {
+                                  const compressed = await compressImage(file, 600, 300, 0.75);
+                                  setLogoUrl(compressed);
+                                } catch (err) {
+                                  console.error(err);
+                                  alert("Gagal mengunggah logo.");
+                                }
+                              }
+                            }}
+                            className="hidden"
+                          />
+                        </label>
                       </div>
                     </div>
-                  )}
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                        Atau Masukkan URL Gambar Logo
+                      </label>
+                      <input
+                        type="text"
+                        value={logoUrl}
+                        onChange={(e) => setLogoUrl(e.target.value)}
+                        placeholder="Contoh: https://domain.com/logo.png"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navbar Simulator Preview */}
+                <div className="pt-3 border-t border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
+                    Pratinjau Di Navbar Website:
+                  </span>
+                  <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between shadow-inner">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      {logoUrl ? (
+                        <img src={logoUrl} className="h-8 max-w-[130px] object-contain" alt="Logo Preview" />
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs">
+                            RD
+                          </div>
+                          <span className="font-display font-black text-xs text-white uppercase tracking-wider truncate">
+                            {brandName || "ROYAL DRIVE"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    {logoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setLogoUrl("")}
+                        className="text-[10px] font-bold text-rose-400 hover:text-white bg-rose-500/20 hover:bg-rose-600 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
+                      >
+                        Reset Logo
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Slideshow Images Settings */}
-            <div className="bg-slate-50 border border-slate-200 p-6 md:p-8 rounded-3xl space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h4 className="font-display font-bold text-sm text-slate-800">2. Gambar Background Slideshow Banner</h4>
-                
+            {/* Slideshow Images Section */}
+            <div className="p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold">
+                    <Grid className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-display font-bold text-sm text-slate-900">3. Background Slideshow Banner</h3>
+                      <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">
+                        {bgImages.length} Slide Aktif
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500">Gambar latar belakang yang berputar otomatis di halaman beranda</p>
+                  </div>
+                </div>
+
                 <div className="flex items-center space-x-2">
-                  {/* File Upload Button */}
-                  <label className="flex items-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white font-display font-semibold text-[10px] uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all focus:outline-none cursor-pointer shadow-md shadow-emerald-500/10">
+                  <label className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs">
                     <Plus className="w-3.5 h-3.5" />
-                    <span>Upload File</span>
+                    <span>Upload Slide Baru</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -5962,44 +6179,45 @@ export default function AdminDashboard({
                     />
                   </label>
 
-                  {/* Add URL Button */}
                   <button
+                    type="button"
                     onClick={() => {
                       const newUrl = prompt("Masukkan URL Gambar Latar Belakang Baru (Unsplash/Direct Link):");
                       if (newUrl && newUrl.trim()) {
                         setBgImages([...bgImages, newUrl.trim()]);
                       }
                     }}
-                    className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-900 text-white font-display font-semibold text-[10px] uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all focus:outline-none cursor-pointer"
+                    className="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer border border-slate-200"
                   >
                     <span>Input Link URL</span>
                   </button>
                 </div>
               </div>
 
-              {/* Images Grid list */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Grid of Slide Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
                 {bgImages.map((img, idx) => (
-                  <div key={idx} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between group">
-                    <div className="aspect-video w-full bg-slate-100 overflow-hidden relative">
-                      <img src={img} className="w-full h-full object-cover" alt="" />
-                      <span className="absolute top-2 left-2 bg-slate-900/80 text-white text-[8px] px-2 py-0.5 rounded font-bold">
-                        Slide {idx + 1}
+                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-2xs flex flex-col justify-between group hover:shadow-md transition-shadow">
+                    <div className="aspect-video w-full bg-slate-200 overflow-hidden relative">
+                      <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="" />
+                      <span className="absolute top-2 left-2 bg-slate-950/80 text-white text-[9px] px-2 py-0.5 rounded-md font-bold backdrop-blur-xs">
+                        Slide {idx + 1} {idx === 0 ? "(Utama)" : ""}
                       </span>
                     </div>
-                    <div className="p-3 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
-                      <span className="text-[9px] text-slate-450 truncate max-w-[150px]">{img}</span>
+                    <div className="p-2.5 flex items-center justify-between border-t border-slate-200 bg-white">
+                      <span className="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">{img}</span>
                       <button
+                        type="button"
                         disabled={bgImages.length <= 1}
                         onClick={() => {
-                          if (confirm("Hapus gambar slide ini?")) {
+                          if (confirm("Hapus slide ini dari banner beranda?")) {
                             setBgImages(bgImages.filter((_, i) => i !== idx));
                           }
                         }}
-                        className="p-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+                        className="p-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
                         title="Hapus Slide"
                       >
-                        <Trash className="w-4 h-4" />
+                        <Trash className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -6007,20 +6225,29 @@ export default function AdminDashboard({
               </div>
             </div>
 
-            {/* Save Button for Appearance */}
-            <div className="pt-4 flex items-center space-x-3 max-w-2xl">
-              <button
-                onClick={handleSaveAppearance}
-                className="bg-accent hover:bg-accent-hover text-white font-display font-bold text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-xl focus:outline-none cursor-pointer transition-colors shadow-lg shadow-accent/10"
-              >
-                Simpan Perubahan Tampilan
-              </button>
-              <button
-                onClick={handleResetAppearance}
-                className="bg-slate-205 hover:bg-slate-300 text-slate-700 font-display font-bold text-[10px] uppercase tracking-widest px-6 py-3.5 rounded-xl focus:outline-none cursor-pointer transition-colors border border-slate-200"
-              >
-                Reset ke Default
-              </button>
+            {/* Bottom Save Bar */}
+            <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center space-x-2 text-slate-500 text-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Seluruh pengunjung website akan langsung melihat banner dan logo terbaru setelah disimpan.</span>
+              </div>
+              <div className="flex items-center space-x-2.5 self-stretch sm:self-auto">
+                <button
+                  type="button"
+                  onClick={handleResetAppearance}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all border border-slate-200 cursor-pointer"
+                >
+                  Reset Default
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAppearance}
+                  className="flex-1 sm:flex-initial px-6 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-accent/20 cursor-pointer flex items-center justify-center space-x-2"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Simpan Perubahan Tampilan</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
