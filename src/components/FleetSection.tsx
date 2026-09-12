@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Users, Eye, ArrowLeftRight, Check, AlertCircle } from "lucide-react";
+import { Star, Users, Eye, ArrowLeftRight, Check, AlertCircle, SlidersHorizontal, RotateCcw } from "lucide-react";
 import { Car, formatRupiah } from "../data/cars";
+import { SearchFilterState } from "./FloatSearch";
 
 interface FleetSectionProps {
   cars: Car[];
@@ -12,6 +13,8 @@ interface FleetSectionProps {
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
   categories?: string[];
+  searchFilters?: SearchFilterState | null;
+  onResetFilters?: () => void;
 }
 
 export default function FleetSection({
@@ -22,6 +25,8 @@ export default function FleetSection({
   selectedCategory,
   setSelectedCategory,
   categories,
+  searchFilters,
+  onResetFilters,
 }: FleetSectionProps) {
   const allCategoryTabs = [
     "All",
@@ -30,15 +35,25 @@ export default function FleetSection({
       : Array.from(new Set(cars.map(c => c.category).filter(Boolean))))
   ];
 
-  const filteredCars = selectedCategory === "All"
-    ? cars
-    : cars.filter(car => car.category === selectedCategory);
+  const hasActiveFilters = Boolean(
+    searchFilters &&
+      (searchFilters.category !== "Semua" ||
+        searchFilters.brand !== "Semua" ||
+        searchFilters.model !== "Semua" ||
+        searchFilters.transmission !== "Semua" ||
+        searchFilters.seats !== "Semua" ||
+        !searchFilters.noBudgetLimit)
+  );
+
+  // cars is already filtered strictly by page.tsx (displayedCars)
+  const filteredCars = cars;
 
   const formatCurrency = (val: number) => formatRupiah(val);
 
   const isComparing = (carId: string) => {
     return compareList.some(c => c.id === carId);
   };
+
 
   return (
     <section id="fleet" className="py-24 bg-slate-50 relative">
@@ -63,7 +78,7 @@ export default function FleetSection({
         </div>
 
         {/* Categories Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-12">
+        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-8">
           {allCategoryTabs.map((cat) => (
             <button
               key={cat}
@@ -79,17 +94,98 @@ export default function FleetSection({
           ))}
         </div>
 
+        {/* Active Search Filters Bar */}
+        {hasActiveFilters && searchFilters && (
+          <div className="mb-10 p-4 bg-white rounded-2xl border border-red-100 shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mr-1">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-red-600" />
+                Filter Aktif:
+              </span>
+              {searchFilters.category !== "Semua" && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">
+                  Kategori: <strong className="ml-1 text-slate-900">{searchFilters.category}</strong>
+                </span>
+              )}
+              {searchFilters.brand !== "Semua" && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">
+                  Merek: <strong className="ml-1 text-slate-900">{searchFilters.brand}</strong>
+                </span>
+              )}
+              {searchFilters.model !== "Semua" && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">
+                  Model: <strong className="ml-1 text-slate-900">{searchFilters.model}</strong>
+                </span>
+              )}
+              {searchFilters.seats !== "Semua" && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">
+                  Kapasitas: <strong className="ml-1 text-slate-900">{searchFilters.seats === "10+" ? "10+ Penumpang" : `${searchFilters.seats} Penumpang`}</strong>
+                </span>
+              )}
+              {searchFilters.transmission !== "Semua" && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">
+                  Transmisi: <strong className="ml-1 text-slate-900">{searchFilters.transmission}</strong>
+                </span>
+              )}
+              {!searchFilters.noBudgetLimit && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">
+                  Tarif: <strong className="ml-1 text-slate-900">≤ {formatCurrency(searchFilters.maxBudget)}</strong>
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-500 font-medium">
+                Ditemukan <strong className="text-red-600">{filteredCars.length}</strong> unit
+              </span>
+              {onResetFilters && (
+                <button
+                  onClick={onResetFilters}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Reset Filter
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Cars Swipeable List (Mobile) / Grid (Desktop) */}
         <div className="relative">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={selectedCategory}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-6 md:pb-0 pt-2 -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-auto md:w-full"
-            >
+          {filteredCars.length === 0 ? (
+            <div className="py-16 text-center max-w-md mx-auto bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+                <AlertCircle className="w-7 h-7" />
+              </div>
+              <h3 className="font-display font-bold text-lg text-slate-800">
+                Tidak Ada Armada yang Cocok
+              </h3>
+              <p className="text-xs text-slate-500 mt-2 mb-6 leading-relaxed">
+                Maaf, tidak ada unit kendaraan yang sesuai dengan kombinasi kriteria pencarian Anda. Silakan sesuaikan pilihan atau reset filter untuk melihat seluruh unit kami.
+              </p>
+              {onResetFilters && (
+                <button
+                  onClick={onResetFilters}
+                  className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl transition-all shadow-md shadow-red-600/20 active:scale-95 cursor-pointer"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset Filter & Lihat Semua Armada
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedCategory + (searchFilters?.brand || "") + (searchFilters?.model || "")}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-6 md:pb-0 pt-2 -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-auto md:w-full"
+              >
+
               {filteredCars.map((car) => (
                 <div
                   key={car.id}
@@ -232,8 +328,11 @@ export default function FleetSection({
               <span className="animate-pulse">👉</span>
             </span>
           </div>
+          </>
+          )}
         </div>
       </div>
     </section>
   );
 }
+

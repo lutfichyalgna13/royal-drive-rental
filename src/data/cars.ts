@@ -35,6 +35,51 @@ export function formatRupiah(val: number): string {
   return `Rp ${numStr}`;
 }
 
+export function extractCarBrand(name: string): string {
+  if (!name) return "Lainnya";
+  if (name.startsWith("Mercedes-Benz")) return "Mercedes-Benz";
+  const firstWord = name.split(" ")[0];
+  return firstWord || "Lainnya";
+}
+
+export function extractCarModel(name: string, brand?: string): string {
+  if (!name) return "Lainnya";
+  const knownModels = [
+    "Innova Zenix",
+    "Innova Reborn",
+    "Pajero Sport",
+    "Hiace Premio",
+    "Elf Long",
+    "S-Class",
+    "Air EV",
+    "Ioniq 5",
+    "Calya",
+    "Sigra",
+    "Avanza",
+    "Xenia",
+    "Xpander",
+    "Ertiga",
+    "Brio",
+    "Agya",
+    "Ayla",
+    "Fortuner",
+    "CR-V",
+    "Alphard",
+    "Camry",
+    "C300"
+  ];
+  for (const km of knownModels) {
+    if (new RegExp(`\\b${km}\\b`, "i").test(name) || name.toLowerCase().includes(km.toLowerCase())) {
+      return km;
+    }
+  }
+  const b = brand || extractCarBrand(name);
+  const withoutBrand = name.replace(b, "").trim();
+  const words = withoutBrand.split(" ");
+  return words[0] || "Lainnya";
+}
+
+
 export const carsData: Car[] = [
   {
     id: "toyota-calya",

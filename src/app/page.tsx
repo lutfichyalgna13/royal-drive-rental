@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import CustomCursor from "../components/CustomCursor";
 import Navbar from "../components/Navbar";
-import FloatSearch from "../components/FloatSearch";
+import FloatSearch, { SearchFilterState } from "../components/FloatSearch";
 import FleetSection from "../components/FleetSection";
 import CarDetailModal from "../components/CarDetailModal";
 import CarComparison from "../components/CarComparison";
@@ -22,7 +22,7 @@ import AdminLogin from "../components/AdminLogin";
 import WhatsAppWidget from "../components/WhatsAppWidget";
 import { playNotificationChime, sendDesktopNotification } from "../utils/notifications";
 import { safeSaveBookings, purgeObsoleteStorageKeys } from "../utils/storage";
-import { Car, carsData, defaultCategories, Testimonial, testimonialsData, FAQItem, faqsData, BlogPost, blogPostsData, formatRupiah } from "../data/cars";
+import { Car, carsData, defaultCategories, Testimonial, testimonialsData, FAQItem, faqsData, BlogPost, blogPostsData, formatRupiah, extractCarBrand, extractCarModel } from "../data/cars";
 import { ShieldCheck, Headphones, ThumbsUp, CreditCard } from "lucide-react";
 
 export default function Home() {
@@ -38,13 +38,8 @@ export default function Home() {
   const [faqs, setFaqs] = useState<FAQItem[]>(faqsData);
   
   // Search filters state
-  const [searchFilters, setSearchFilters] = useState<{
-    category: string;
-    brand: string;
-    model: string;
-    maxBudget: number;
-    transmission: string;
-  } | null>(null);
+  const [searchFilters, setSearchFilters] = useState<SearchFilterState | null>(null);
+
 
   const defaultBgImages = [
     "/images/hero-banner.webp",
@@ -159,26 +154,25 @@ export default function Home() {
     }
   };
 
-  const handleFloatSearch = (filters: {
-    category: string;
-    brand: string;
-    model: string;
-    maxBudget: number;
-    transmission: string;
-    minYear: string;
-  }) => {
+  const handleFloatSearch = (filters: SearchFilterState) => {
     setSearchFilters(filters);
 
-    // If a category was chosen, set category tab selected
+    // If a category was chosen, sync category tab
     if (filters.category !== "Semua") {
       setSelectedCategory(filters.category);
     } else {
       setSelectedCategory("All");
     }
 
-    // Scroll to the fleet list
+    // Scroll smoothly to the fleet list
     handleNavClick("fleet");
   };
+
+  const handleResetSearchFilters = () => {
+    setSearchFilters(null);
+    setSelectedCategory("All");
+  };
+
 
   // Compare toggler logic
   const handleCompareToggle = (car: Car) => {
@@ -518,33 +512,61 @@ export default function Home() {
   }, [categories, isInitialized]);
 
   // Compute the displayed cars list dynamically based on active categories and search filters
+  // Compute the displayed cars list dynamically based on active categories and search filters
   const displayedCars = cars.filter((car) => {
     // 1. Apply category tab filter
     if (selectedCategory !== "All" && selectedCategory !== "Semua" && car.category !== selectedCategory) {
       return false;
     }
     
-    // 2. Apply float search filters if active
+    // 2. Apply float search filters if active (Strict Exact Match)
     if (searchFilters) {
+      // Category match
       if (searchFilters.category !== "Semua" && car.category !== searchFilters.category) {
         return false;
       }
-      if (searchFilters.brand !== "Semua" && !car.name.toLowerCase().includes(searchFilters.brand.toLowerCase())) {
-        return false;
+
+      // Brand exact match
+      if (searchFilters.brand !== "Semua") {
+        const carBrand = extractCarBrand(car.name);
+        if (carBrand !== searchFilters.brand) {
+          return false;
+        }
       }
-      if (searchFilters.model !== "Semua" && !car.name.toLowerCase().includes(searchFilters.model.toLowerCase())) {
-        return false;
+
+      // Model exact match
+      if (searchFilters.model !== "Semua") {
+        const carModel = extractCarModel(car.name, searchFilters.brand !== "Semua" ? searchFilters.brand : undefined);
+        if (carModel !== searchFilters.model && !car.name.toLowerCase().includes(searchFilters.model.toLowerCase())) {
+          return false;
+        }
       }
-      if (car.pricePerDay > searchFilters.maxBudget) {
-        return false;
-      }
+
+      // Transmission match
       if (searchFilters.transmission !== "Semua" && car.transmission !== searchFilters.transmission) {
+        return false;
+      }
+
+      // Seating capacity match
+      if (searchFilters.seats === "4-5" && car.seats > 5) {
+        return false;
+      }
+      if (searchFilters.seats === "6-8" && (car.seats < 6 || car.seats > 8)) {
+        return false;
+      }
+      if (searchFilters.seats === "10+" && car.seats < 10) {
+        return false;
+      }
+
+      // Budget limit (applied only if not noBudgetLimit)
+      if (!searchFilters.noBudgetLimit && car.pricePerDay > searchFilters.maxBudget) {
         return false;
       }
     }
     
     return true;
   });
+
 
 
 
@@ -609,7 +631,13 @@ export default function Home() {
       {/* Main Sections */}
       <main>
         {/* Floating Search Bar */}
-        <FloatSearch onSearch={handleFloatSearch} categories={categories} />
+        <FloatSearch
+          onSearch={handleFloatSearch}
+          categories={categories}
+          cars={cars}
+          activeFilters={searchFilters}
+          onReset={handleResetSearchFilters}
+        />
 
         {/* Fleet Grid */}
         <FleetSection
@@ -620,6 +648,8 @@ export default function Home() {
           selectedCategory={selectedCategory}
           setSelectedCategory={handleCategoryChange}
           categories={categories}
+          searchFilters={searchFilters}
+          onResetFilters={handleResetSearchFilters}
         />
 
         {/* Price Calculator */}
