@@ -2590,40 +2590,81 @@ export default function AdminDashboard({
       return 0;
     });
 
-  const navTabs = [
-    { id: "analytics", label: "Analytics", icon: <LayoutDashboard className="w-4 h-4" /> },
-    { id: "fleet", label: "Kelola Armada", icon: <Car className="w-4 h-4" /> },
-    { 
-      id: "bookings", 
-      label: "Kelola Booking", 
-      icon: <Calendar className="w-4 h-4" />,
-      badge: bookings.filter(b => b.status === "Pending").length > 0 
-        ? `${bookings.filter(b => b.status === "Pending").length} Baru` 
-        : null
+  const navGroups = [
+    {
+      group: "Operasional Utama",
+      items: [
+        { id: "analytics", label: "Ringkasan & Analitik", icon: <LayoutDashboard className="w-4 h-4" /> },
+        { 
+          id: "bookings", 
+          label: "Kelola Booking", 
+          icon: <Calendar className="w-4 h-4" />,
+          badge: bookings.filter(b => b.status === "Pending").length > 0 
+            ? `${bookings.filter(b => b.status === "Pending").length} Baru` 
+            : null,
+          badgeColor: "amber"
+        },
+        { 
+          id: "fleet", 
+          label: "Kelola Armada", 
+          icon: <Car className="w-4 h-4" />,
+          badge: `${cars.length} Unit`,
+          badgeColor: "slate"
+        },
+        { 
+          id: "customers", 
+          label: "Data Pelanggan (CRM)", 
+          icon: <Users className="w-4 h-4" />,
+          badge: customers.filter(c => c.status === "Blacklist").length > 0 
+            ? `${customers.filter(c => c.status === "Blacklist").length} Blacklist` 
+            : null,
+          badgeColor: "rose"
+        },
+        { 
+          id: "drivers", 
+          label: "Kelola Driver", 
+          icon: <UserCheck className="w-4 h-4" />,
+          badge: drivers.filter(d => d.status === "Standby").length > 0 
+            ? `${drivers.filter(d => d.status === "Standby").length} Siap` 
+            : null,
+          badgeColor: "emerald"
+        },
+      ]
     },
-    { 
-      id: "drivers", 
-      label: "Kelola Driver", 
-      icon: <Users className="w-4 h-4" />,
-      badge: drivers.filter(d => d.status === "Standby").length > 0 
-        ? `${drivers.filter(d => d.status === "Standby").length} Siap` 
-        : null
+    {
+      group: "Armada & Keuangan",
+      items: [
+        { 
+          id: "maintenance", 
+          label: "Servis & Pajak STNK", 
+          icon: <Wrench className="w-4 h-4" />,
+          badge: (urgentTaxCount + urgentServiceCount) > 0 ? `${urgentTaxCount + urgentServiceCount} Perlu` : null,
+          badgeColor: "rose"
+        },
+        { id: "finance", label: "Buku Kas & Keuangan", icon: <Wallet className="w-4 h-4" /> },
+      ]
     },
-    { 
-      id: "maintenance", 
-      label: "Servis & Pajak", 
-      icon: <Wrench className="w-4 h-4" />,
-      badge: (urgentTaxCount + urgentServiceCount) > 0 ? (urgentTaxCount + urgentServiceCount) : null
+    {
+      group: "Konten Website",
+      items: [
+        { id: "testimonials", label: "Kelola Ulasan", icon: <MessageSquare className="w-4 h-4" /> },
+        { id: "faqs", label: "Tanya Jawab FAQ", icon: <HelpCircle className="w-4 h-4" /> },
+        { id: "blog", label: "Jurnal & Artikel", icon: <FileText className="w-4 h-4" /> },
+        { id: "appearance", label: "Tampilan & Banner", icon: <Image className="w-4 h-4" /> },
+      ]
     },
-    { id: "finance", label: "Buku Kas & Keuangan", icon: <Wallet className="w-4 h-4" /> },
-    { id: "testimonials", label: "Kelola Ulasan", icon: <MessageSquare className="w-4 h-4" /> },
-    { id: "faqs", label: "Kelola FAQ", icon: <HelpCircle className="w-4 h-4" /> },
-    { id: "blog", label: "Kelola Artikel", icon: <FileText className="w-4 h-4" /> },
-    { id: "appearance", label: "Kelola Tampilan", icon: <Image className="w-4 h-4" /> },
-    { id: "settings", label: "Pengaturan", icon: <Sliders className="w-4 h-4" /> },
+    {
+      group: "Sistem",
+      items: [
+        { id: "settings", label: "Pengaturan Rental", icon: <Sliders className="w-4 h-4" /> },
+      ]
+    }
   ];
 
-  const currentActiveTabObj = navTabs.find(t => t.id === activeTab) || navTabs[0];
+  const allNavItems = navGroups.flatMap(g => g.items);
+  const navTabs = allNavItems;
+  const currentActiveTabObj = allNavItems.find(t => t.id === activeTab) || allNavItems[0];
+  const currentGroupObj = navGroups.find(g => g.items.some(t => t.id === activeTab)) || navGroups[0];
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col md:flex-row h-screen text-slate-600 overflow-hidden font-sans">
@@ -2684,75 +2725,95 @@ export default function AdminDashboard({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 md:hidden"
+              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 md:hidden"
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 250 }}
-              className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-slate-50 border-r border-slate-200 z-50 flex flex-col justify-between p-5 md:hidden shadow-2xl overflow-y-auto"
+              className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-slate-950 border-r border-slate-800 z-50 flex flex-col justify-between p-5 md:hidden shadow-2xl overflow-y-auto text-slate-300"
             >
               <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
                   <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-accent text-white flex items-center justify-center shadow-md shadow-accent/20">
-                      <ShieldAlert className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-display font-black text-base shadow-md shadow-amber-500/20">
+                      RD
                     </div>
                     <div className="text-left">
-                      <span className="font-display font-black text-xs text-slate-800 uppercase tracking-wider block">Admin Console</span>
-                      <span className="text-[10px] text-emerald-600 font-semibold flex items-center space-x-1">
+                      <span className="font-display font-black text-xs text-white uppercase tracking-wider block">Royal Drive</span>
+                      <span className="text-[10px] text-emerald-400 font-semibold flex items-center space-x-1 mt-0.5">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping mr-1 inline-block" />
-                        Online & Terhubung
+                        Live Console
                       </span>
                     </div>
                   </div>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+                    className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                     aria-label="Tutup Menu"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <nav className="space-y-1">
-                  {navTabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        setActiveTab(tab.id as any);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer text-left ${
-                        activeTab === tab.id
-                          ? "bg-accent text-white font-bold shadow-md shadow-accent/20"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/70"
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        {tab.icon}
-                        <span>{tab.label}</span>
+                <nav className="space-y-4">
+                  {navGroups.map((grp) => (
+                    <div key={grp.group} className="space-y-1">
+                      <div className="px-3 text-[9px] font-bold uppercase tracking-widest text-slate-500">
+                        {grp.group}
                       </div>
-                      {tab.badge ? (
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-2 ${
-                          activeTab === tab.id ? "bg-white text-accent" : "bg-red-500 text-white animate-pulse"
-                        }`}>
-                          {tab.badge}
-                        </span>
-                      ) : null}
-                    </button>
+                      <div className="space-y-0.5">
+                        {grp.items.map((tab) => {
+                          const isActive = activeTab === tab.id;
+                          return (
+                            <button
+                              key={tab.id}
+                              onClick={() => {
+                                setActiveTab(tab.id as any);
+                                setIsMobileMenuOpen(false);
+                              }}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer text-left ${
+                                isActive
+                                  ? "bg-accent text-white font-bold shadow-md shadow-accent/20 border-l-4 border-amber-300"
+                                  : "text-slate-400 hover:text-white hover:bg-slate-900"
+                              }`}
+                            >
+                              <div className="flex items-center space-x-3 min-w-0">
+                                <span className={isActive ? "text-white" : "text-slate-400"}>{tab.icon}</span>
+                                <span className="truncate">{tab.label}</span>
+                              </div>
+                              {tab.badge ? (
+                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ml-2 shrink-0 ${
+                                  isActive
+                                    ? "bg-white text-accent font-extrabold"
+                                    : tab.badgeColor === "amber"
+                                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                      : tab.badgeColor === "rose"
+                                        ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                                        : tab.badgeColor === "emerald"
+                                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                                          : "bg-slate-800 text-slate-300"
+                                }`}>
+                                  {tab.badge}
+                                </span>
+                              ) : null}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   ))}
                 </nav>
               </div>
 
-              <div className="pt-5 border-t border-slate-200 mt-6">
+              <div className="pt-4 border-t border-slate-800 mt-6">
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     onClose();
                   }}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer font-bold"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-rose-400 hover:text-white hover:bg-rose-600/20 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer font-bold border border-rose-500/30"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Exit Console</span>
@@ -2764,123 +2825,164 @@ export default function AdminDashboard({
       </AnimatePresence>
 
       {/* DESKTOP SIDEBAR (Visible on md and above) */}
-      <aside className="hidden md:flex md:w-64 bg-slate-50 border-r border-slate-200 flex-col justify-between p-6 shrink-0 z-10 overflow-y-auto">
-        <div className="space-y-8">
-          <div className="flex items-center justify-between">
-            <span className="font-display text-[10px] uppercase tracking-widest font-bold text-slate-400">Admin Console</span>
-            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" title="Admin Active" />
+      <aside className="hidden md:flex md:w-68 bg-slate-950 border-r border-slate-800/90 flex-col justify-between p-5 shrink-0 z-10 overflow-y-auto text-slate-300 select-none shadow-2xl">
+        <div className="space-y-6">
+          {/* Brand Header */}
+          <div className="p-3.5 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center space-x-3 shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-display font-black text-base shadow-md shadow-amber-500/20 shrink-0">
+              RD
+            </div>
+            <div className="text-left min-w-0">
+              <span className="font-display font-black text-xs text-white uppercase tracking-wider block truncate">
+                ROYAL DRIVE
+              </span>
+              <div className="flex items-center space-x-1.5 mt-0.5">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping shrink-0" />
+                <span className="text-[10px] text-emerald-400 font-semibold truncate">Live HQ Console</span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center space-x-3 p-2 border-b border-slate-200 pb-6">
-            <div className="w-10 h-10 rounded-full bg-slate-100 border border-accent flex items-center justify-center text-accent">
-              <ShieldAlert className="w-5 h-5" />
-            </div>
-            <div className="text-left">
-              <span className="font-display font-bold text-xs text-slate-800 block">Administrator</span>
-              <span className="text-[9px] text-slate-500 font-medium">Super Admin Console</span>
-            </div>
-          </div>
-
-          <nav className="flex flex-col space-y-1.5">
-            {navTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center justify-between px-4 py-2.5 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "bg-accent text-white font-bold shadow-lg shadow-accent/15"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-100"
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  {tab.icon}
-                  <span>{tab.label}</span>
+          {/* Grouped Navigation */}
+          <nav className="space-y-4">
+            {navGroups.map((group) => (
+              <div key={group.group} className="space-y-1">
+                <div className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                  {group.group}
                 </div>
-                {tab.badge ? (
-                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-2 ${
-                    activeTab === tab.id ? "bg-white text-accent" : "bg-red-500 text-white animate-pulse"
-                  }`}>
-                    {tab.badge}
-                  </span>
-                ) : null}
-              </button>
+                <div className="space-y-1">
+                  {group.items.map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer text-left ${
+                          isActive
+                            ? "bg-accent text-white font-bold shadow-lg shadow-accent/20 border-l-4 border-amber-300"
+                            : "text-slate-400 hover:text-white hover:bg-slate-900/80"
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3 min-w-0">
+                          <span className={isActive ? "text-white" : "text-slate-400"}>
+                            {tab.icon}
+                          </span>
+                          <span className="truncate">{tab.label}</span>
+                        </div>
+                        {tab.badge ? (
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ml-1.5 shrink-0 ${
+                            isActive
+                              ? "bg-white text-accent font-extrabold shadow-xs"
+                              : tab.badgeColor === "amber"
+                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold"
+                                : tab.badgeColor === "rose"
+                                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold"
+                                  : tab.badgeColor === "emerald"
+                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
+                                    : "bg-slate-800 text-slate-300 border border-slate-700"
+                          }`}>
+                            {tab.badge}
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </nav>
         </div>
 
-        <button
-          onClick={onClose}
-          className="flex items-center space-x-3 px-4 py-2.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl font-display text-xs uppercase tracking-wider transition-all mt-6 focus:outline-none cursor-pointer"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Exit Console</span>
-        </button>
-      </aside>
-
-      {/* ADMIN CONTENT PANEL */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto z-0 bg-white relative">
-        
-        {/* TOPBAR: Breadcrumb & Real-time Notification Control */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-8 border-b border-slate-200/80 gap-4">
-          <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 text-accent flex items-center justify-center">
-              {currentActiveTabObj.icon}
+        {/* Sidebar Footer: User Profile & Exit */}
+        <div className="pt-4 border-t border-slate-800/80 mt-6 space-y-3">
+          <div className="flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-left">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
+              SA
             </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-display font-black text-sm uppercase tracking-wider text-slate-800">
-                  {currentActiveTabObj.label}
-                </span>
-                <span className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold flex items-center space-x-1">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping mr-1 inline-block" />
-                  Live Sync
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-400 font-sans block">
-                {brandName} Console &bull; SCBD Jakarta
-              </span>
+            <div className="min-w-0 flex-1">
+              <span className="font-display font-bold text-xs text-white block truncate">Administrator</span>
+              <span className="text-[10px] text-slate-400 block truncate">Super Admin Console</span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2.5 self-end sm:self-auto">
-            {/* Audio Sound Toggle */}
+          <button
+            onClick={onClose}
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-rose-400 hover:text-white hover:bg-rose-500/20 rounded-xl font-display text-xs uppercase tracking-wider transition-all border border-rose-500/20 cursor-pointer font-bold"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Exit Console</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* ADMIN CONTENT PANEL */}
+      <main className="flex-1 p-6 md:p-10 overflow-y-auto z-0 bg-slate-50/50 relative text-left">
+        
+        {/* TOPBAR: Breadcrumb & Real-time Notification Control */}
+        <div className="sticky -top-6 -mx-6 md:-top-10 md:-mx-10 px-6 md:px-10 py-4 mb-8 bg-white/95 backdrop-blur-md border-b border-slate-200/90 z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 text-accent flex items-center justify-center shrink-0 shadow-xs">
+              {currentActiveTabObj.icon}
+            </div>
+            <div>
+              <div className="flex items-center space-x-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <span>Console</span>
+                <span>/</span>
+                <span className="text-slate-600">{currentGroupObj.group}</span>
+                <span>/</span>
+                <span className="text-accent font-black">{currentActiveTabObj.label}</span>
+              </div>
+              <h1 className="font-display font-black text-lg md:text-xl text-slate-900 leading-tight">
+                {currentActiveTabObj.label}
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center flex-wrap gap-2.5">
+            {/* Live Sync Status Pill */}
+            <div className="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping shrink-0" />
+              <span>Real-time Sync</span>
+            </div>
+
+            {/* Audio Bell Mute/Unmute */}
             <button
               onClick={toggleSound}
               type="button"
-              title={soundEnabled ? "Suara Notifikasi Aktif (Klik untuk Membisukan)" : "Suara Notifikasi Bisu (Klik untuk Mengaktifkan)"}
-              className={`px-3 py-2 rounded-xl border text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
-                soundEnabled
-                  ? "bg-amber-50/80 text-amber-800 border-amber-200 hover:bg-amber-100"
-                  : "bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200"
+              className={`flex items-center space-x-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                soundEnabled 
+                  ? "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100" 
+                  : "bg-slate-100 border-slate-300 text-slate-400 hover:bg-slate-200"
               }`}
+              title={soundEnabled ? "Audio Notifikasi Aktif" : "Audio Notifikasi Bisu"}
             >
-              {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-600 animate-pulse" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
-              <span className="text-[11px]">{soundEnabled ? "Audio Bel Aktif" : "Audio Bisu"}</span>
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-emerald-600" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
+              <span className="text-[11px]">{soundEnabled ? "Audio Bel" : "Muted"}</span>
             </button>
 
-            {/* Desktop Notification Request if not granted */}
+            {/* Desktop Notification Request */}
             {desktopNotifState !== "granted" && (
               <button
                 onClick={handleRequestDesktopPush}
                 type="button"
-                className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl border border-blue-200 bg-blue-50/70 text-blue-700 hover:bg-blue-100 text-xs font-semibold transition-all cursor-pointer"
+                className="hidden xl:inline-flex items-center space-x-1.5 px-3 py-2 rounded-xl border border-blue-200 bg-blue-50/70 text-blue-700 hover:bg-blue-100 text-xs font-semibold transition-all cursor-pointer"
                 title="Aktifkan Notifikasi Desktop Browser"
               >
                 <Bell className="w-3.5 h-3.5 text-blue-600" />
-                <span className="text-[11px]">Izinkan Push Desktop</span>
+                <span className="text-[11px]">Push Notif</span>
               </button>
             )}
 
-            {/* Notification Bell Button & Dropdown */}
+            {/* Notification Bell Dropdown Button */}
             <div className="relative">
               <button
                 onClick={() => setIsNotifCenterOpen(!isNotifCenterOpen)}
                 type="button"
-                className="px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-slate-300 relative transition-all cursor-pointer flex items-center space-x-2 shadow-sm"
+                className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 relative transition-all cursor-pointer flex items-center space-x-2 shadow-xs"
                 title="Pusat Notifikasi Pesanan"
               >
                 <Bell className="w-4 h-4 text-slate-600" />
-                <span className="text-xs font-bold">Notifikasi</span>
+                <span className="text-xs font-bold">Pesanan Masuk</span>
                 {bookings.filter(b => b.status === "Pending").length > 0 && (
                   <span className="w-5 h-5 bg-red-500 text-white text-[10px] font-extrabold rounded-full flex items-center justify-center animate-pulse shadow-sm">
                     {bookings.filter(b => b.status === "Pending").length}
@@ -2982,98 +3084,354 @@ export default function AdminDashboard({
         
         {/* TAB 1: Analytics & Reports */}
         {activeTab === "analytics" && (
-          <div className="space-y-8">
-            <div className="text-left">
-              <span className="text-[10px] uppercase tracking-widest text-accent font-semibold block">Dashboard Analytics</span>
-              <h2 className="font-display font-black text-2xl md:text-3xl text-slate-800">Laporan Operasional</h2>
-            </div>
+          <div className="space-y-8 text-left">
+            {/* Header & Quick Action */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-accent font-bold block">Executive Performance Overview</span>
+                <h2 className="font-display font-black text-2xl md:text-3xl text-slate-900">Ringkasan & Analitik Operasional</h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
+                  Pantau performa bisnis sewa mobil, perputaran armada, utilisasi, dan arus kas masuk secara realtime.
+                </p>
+              </div>
 
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
-              <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl text-left">
-                <span className="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Pendapatan Masuk</span>
-                <span className="font-display font-black text-xl md:text-2xl text-accent">{formatCurrency(dynamicTotalRevenue)}</span>
-                <span className="text-[9px] text-emerald-600 flex items-center space-x-1 mt-1 font-sans font-medium">
-                  <TrendingUp className="w-3 h-3" />
-                  <span>Real-time dari DP & Pelunasan</span>
-                </span>
-              </div>
-              <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl text-left">
-                <span className="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Total Booking Aktif</span>
-                <span className="font-display font-black text-xl md:text-2xl text-slate-800">{dynamicActiveBookingsCount} Pesanan</span>
-                <span className="text-[9px] text-slate-500 block mt-1">Pending & Sedang Jalan</span>
-              </div>
-              <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl text-left">
-                <span className="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Utilisasi Armada</span>
-                <span className="font-display font-black text-xl md:text-2xl text-slate-800">{dynamicUtilizationRate}%</span>
-                <span className="text-[9px] text-slate-500 block mt-1">{dynamicRentedCarsCount} dari {cars.length} unit tersewa</span>
-              </div>
-              <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl text-left">
-                <span className="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Mobil Terlaris</span>
-                <span className="font-display font-bold text-sm text-accent mt-1 block truncate">{dynamicPopularCar}</span>
-                <span className="text-[9px] text-slate-500 block mt-1">Paling banyak dipesan</span>
+              <div className="flex items-center space-x-3 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("bookings")}
+                  className="px-4 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-bold rounded-xl shadow-md shadow-accent/20 transition-all flex items-center space-x-2 cursor-pointer"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Buka Kelola Booking</span>
+                </button>
               </div>
             </div>
 
-            {/* Custom Vector SVG Chart */}
-            <div className="p-6 bg-slate-50 border border-slate-200 rounded-3xl text-left">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h4 className="font-display font-bold text-sm text-slate-800">Grafik Pendapatan Semester Pertama</h4>
-                  <span className="text-[10px] text-slate-500">Periode Januari - Juni 2026 (dalam Juta Rupiah)</span>
+            {/* 4 Unified KPI Metric Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Card 1: Total Revenue */}
+              <div className="p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Pendapatan Masuk</span>
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
                 </div>
-                <BarChart3 className="w-5 h-5 text-accent" />
+                <div>
+                  <span className="font-display font-black text-2xl text-emerald-700 block" suppressHydrationWarning>
+                    {formatCurrency(dynamicTotalRevenue)}
+                  </span>
+                  <span className="text-[10px] text-emerald-600 font-semibold flex items-center space-x-1 mt-1">
+                    <TrendingUp className="w-3 h-3 inline" />
+                    <span>Akumulasi DP 30% & Pelunasan</span>
+                  </span>
+                </div>
               </div>
 
-              {/* Line chart simulation using SVG */}
-              <div className="h-64 relative w-full flex items-center justify-center">
-                <svg className="w-full h-full text-slate-200" viewBox="0 0 600 200" fill="none">
-                  {/* Grid Lines */}
-                  <line x1="0" y1="50" x2="600" y2="50" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
-                  <line x1="0" y1="100" x2="600" y2="100" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
-                  <line x1="0" y1="150" x2="600" y2="150" stroke="rgba(0,0,0,0.03)" strokeWidth="1" />
-                  
-                  {/* X Axis labels */}
-                  <text x="10" y="195" fill="rgba(0,0,0,0.4)" fontSize="8">JAN</text>
-                  <text x="110" y="195" fill="rgba(0,0,0,0.4)" fontSize="8">FEB</text>
-                  <text x="210" y="195" fill="rgba(0,0,0,0.4)" fontSize="8">MAR</text>
-                  <text x="310" y="195" fill="rgba(0,0,0,0.4)" fontSize="8">APR</text>
-                  <text x="410" y="195" fill="rgba(0,0,0,0.4)" fontSize="8">MEI</text>
-                  <text x="510" y="195" fill="rgba(0,0,0,0.4)" fontSize="8">JUN</text>
+              {/* Card 2: Active Bookings */}
+              <div className="p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Total Booking Aktif</span>
+                  <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                </div>
+                <div>
+                  <span className="font-display font-black text-2xl text-slate-900 block">
+                    {dynamicActiveBookingsCount} <span className="text-sm font-sans font-normal text-slate-500">Pesanan</span>
+                  </span>
+                  <span className="text-[10px] text-slate-500 block mt-1">
+                    Pending verifikasi & unit di lapangan
+                  </span>
+                </div>
+              </div>
 
-                  {/* Gradient Area below line */}
-                  <defs>
-                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#DC2626" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#DC2626" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M 10 160 Q 110 120 210 130 T 410 70 T 510 50 L 510 180 L 10 180 Z"
-                    fill="url(#chartGrad)"
-                  />
+              {/* Card 3: Fleet Utilization */}
+              <div className="p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Utilisasi Armada</span>
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                </div>
+                <div>
+                  <span className="font-display font-black text-2xl text-amber-700 block">
+                    {dynamicUtilizationRate}%
+                  </span>
+                  <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div 
+                      className="bg-amber-500 h-full rounded-full transition-all duration-500" 
+                      style={{ width: `${dynamicUtilizationRate}%` }} 
+                    />
+                  </div>
+                  <span className="text-[10px] text-slate-500 block mt-1.5">
+                    {dynamicRentedCarsCount} dari {cars.length} unit sedang tersewa
+                  </span>
+                </div>
+              </div>
 
-                  {/* Chart Line path */}
-                  <path
-                    d="M 10 160 Q 110 120 210 130 T 410 70 T 510 50"
-                    stroke="#DC2626"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+              {/* Card 4: Top Car */}
+              <div className="p-5 bg-white border border-slate-200/80 rounded-2xl shadow-xs flex flex-col justify-between space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Armada Terpopuler</span>
+                  <div className="w-9 h-9 rounded-xl bg-violet-50 border border-violet-200 text-violet-600 flex items-center justify-center">
+                    <Car className="w-4 h-4" />
+                  </div>
+                </div>
+                <div>
+                  <span className="font-display font-black text-lg text-slate-900 block truncate" title={dynamicPopularCar}>
+                    {dynamicPopularCar}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block mt-1">
+                    Paling sering disewa pelanggan
+                  </span>
+                </div>
+              </div>
+            </div>
 
-                  {/* Nodes */}
-                  <circle cx="10" cy="160" r="4.5" fill="#FFFFFF" stroke="#DC2626" strokeWidth="2" />
-                  <circle cx="210" cy="130" r="4.5" fill="#FFFFFF" stroke="#DC2626" strokeWidth="2" />
-                  <circle cx="410" cy="70" r="4.5" fill="#FFFFFF" stroke="#DC2626" strokeWidth="2" />
-                  <circle cx="510" cy="50" r="4.5" fill="#FFFFFF" stroke="#DC2626" strokeWidth="2" />
-                </svg>
+            {/* 2-Column Operational Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column (8 cols): Revenue Chart & Recent Bookings Preview */}
+              <div className="lg:col-span-8 space-y-6">
+                {/* Revenue Chart Card */}
+                <div className="p-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-display font-bold text-sm text-slate-900">Tren Pendapatan Rental Showroom</h3>
+                      <p className="text-[11px] text-slate-500">Semester Pertama 2026 (dalam Juta Rupiah)</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="inline-flex items-center space-x-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span>Realisasi Kas</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Line chart simulation using SVG */}
+                  <div className="h-56 relative w-full flex items-center justify-center">
+                    <svg className="w-full h-full text-slate-200" viewBox="0 0 600 200" fill="none">
+                      <line x1="0" y1="50" x2="600" y2="50" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+                      <line x1="0" y1="100" x2="600" y2="100" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+                      <line x1="0" y1="150" x2="600" y2="150" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+                      
+                      <text x="15" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">JAN</text>
+                      <text x="120" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">FEB</text>
+                      <text x="230" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">MAR</text>
+                      <text x="340" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">APR</text>
+                      <text x="450" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">MEI</text>
+                      <text x="555" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">JUN</text>
+
+                      <defs>
+                        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#C5A059" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="#C5A059" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M 20 160 Q 120 115 230 130 T 450 70 T 565 45 L 565 180 L 20 180 Z"
+                        fill="url(#chartGrad)"
+                      />
+
+                      <path
+                        d="M 20 160 Q 120 115 230 130 T 450 70 T 565 45"
+                        stroke="#C5A059"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+
+                      <circle cx="20" cy="160" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
+                      <circle cx="230" cy="130" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
+                      <circle cx="450" cy="70" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
+                      <circle cx="565" cy="45" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* 5 Recent Bookings Table Preview */}
+                <div className="p-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-display font-bold text-sm text-slate-900">Aktivitas Reservasi Terkini</h3>
+                      <p className="text-[11px] text-slate-500">5 transaksi pemesanan armada terbaru</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("bookings")}
+                      className="text-accent hover:text-accent-hover font-bold text-xs transition-colors cursor-pointer"
+                    >
+                      Buka Kelola Booking &rarr;
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-500 border-y border-slate-100 font-display uppercase tracking-wider text-[10px]">
+                        <tr>
+                          <th className="py-2.5 px-3">ID & Pelanggan</th>
+                          <th className="py-2.5 px-3">Armada</th>
+                          <th className="py-2.5 px-3">Total Biaya</th>
+                          <th className="py-2.5 px-3">Status</th>
+                          <th className="py-2.5 px-3 text-right">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {bookings.slice(0, 5).map((b) => (
+                          <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-3 px-3">
+                              <span className="font-bold text-slate-900 block truncate">{b.client}</span>
+                              <span className="text-[10px] font-mono text-slate-400">{b.id}</span>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className="font-semibold text-slate-800 block truncate">{b.car}</span>
+                              <span className="text-[10px] text-slate-500">{b.rentalType}</span>
+                            </td>
+                            <td className="py-3 px-3 font-mono font-bold text-slate-800">
+                              {formatCurrency(b.totalPrice)}
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                b.status === "Pending"
+                                  ? "bg-amber-100 text-amber-800 border border-amber-200"
+                                  : b.status === "Active"
+                                    ? "bg-blue-100 text-blue-800 border border-blue-200"
+                                    : b.status === "Completed"
+                                      ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                      : "bg-slate-100 text-slate-600"
+                              }`}>
+                                {b.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 text-right">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedVerificationBooking(b)}
+                                className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                              >
+                                Detail
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column (4 cols): Quick Operations & Alert Panel */}
+              <div className="lg:col-span-4 space-y-4">
+                {/* Panel Header */}
+                <div className="p-4 bg-slate-900 text-white rounded-2xl shadow-sm space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <ShieldAlert className="w-4 h-4 text-amber-400" />
+                    <span className="font-display font-bold text-xs uppercase tracking-wider">Pusat Kendali Operasi</span>
+                  </div>
+                  <p className="text-[10px] text-slate-400 leading-relaxed">
+                    Peringatan prioritas yang membutuhkan perhatian admin hari ini.
+                  </p>
+                </div>
+
+                {/* Alert 1: Pending DP Bookings */}
+                {bookings.filter(b => b.status === "Pending").length > 0 ? (
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2 text-amber-900 font-bold text-xs">
+                        <Clock className="w-4 h-4 text-amber-600 animate-pulse" />
+                        <span>{bookings.filter(b => b.status === "Pending").length} Booking Menunggu Verifikasi DP</span>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-amber-800 leading-relaxed">
+                      Terdapat pesanan masuk baru yang belum diverifikasi berkas identitas & bukti transfer DP 30%.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("bookings")}
+                      className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer text-center"
+                    >
+                      Buka Antrean Pending &rarr;
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl flex items-center space-x-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <span className="text-xs text-emerald-800 font-semibold">Semua antrean booking terverifikasi rapi.</span>
+                  </div>
+                )}
+
+                {/* Alert 2: Returning Today / Overtime Monitoring */}
+                {todayReturningBookings.length > 0 ? (
+                  <div className="p-4 bg-orange-50 border border-orange-200 rounded-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-display font-bold text-xs text-orange-900">Unit Kembali Hari Ini</span>
+                      <span className="text-[10px] bg-orange-200 text-orange-900 font-extrabold px-2 py-0.5 rounded-full">
+                        {todayReturningBookings.length} Armada
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 pt-1">
+                      {todayReturningBookings.slice(0, 3).map(b => (
+                        <div key={b.id} className="flex items-center justify-between text-xs bg-white p-2 rounded-lg border border-orange-200">
+                          <span className="font-bold text-slate-800 truncate max-w-[120px]">{b.car}</span>
+                          <span className="font-mono text-[10px] text-slate-500">{b.carPlate}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("bookings")}
+                      className="w-full py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer text-center mt-2"
+                    >
+                      Pantau Jadwal Serah Terima &rarr;
+                    </button>
+                  </div>
+                ) : null}
+
+                {/* Alert 3: Urgent Tax / STNK */}
+                {urgentTaxCount > 0 && (
+                  <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-display font-bold text-xs text-rose-900">Jatuh Tempo Pajak STNK</span>
+                      <span className="text-[10px] bg-rose-200 text-rose-900 font-extrabold px-2 py-0.5 rounded-full">
+                        {urgentTaxCount} Unit
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-rose-800">
+                      Ada armada yang masa berlaku pajak STNK akan habis dalam 30 hari ke depan.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("maintenance")}
+                      className="w-full py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer text-center"
+                    >
+                      Lihat Rincian Pajak &rarr;
+                    </button>
+                  </div>
+                )}
+
+                {/* Quick Status: Drivers */}
+                <div className="p-4 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-display font-bold text-xs text-slate-800">Status Driver Siap</span>
+                    <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded-full">
+                      {drivers.filter(d => d.status === "Standby").length} Standby
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    Pengemudi resmi siap ditugaskan melayani pesanan sewa mobil dengan sopir.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("drivers")}
+                    className="text-accent hover:text-accent-hover font-bold text-xs transition-colors cursor-pointer block pt-1"
+                  >
+                    Buka Roster Driver &rarr;
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        )}
-
-        {/* TAB 2: Kelola Armada (User-Friendly Fleet Management) */}
+        )}{/* TAB 2: Kelola Armada (User-Friendly Fleet Management) */}
         {activeTab === "fleet" && (
           <div className="space-y-6">
             
@@ -3661,24 +4019,94 @@ export default function AdminDashboard({
 
         {/* TAB 3: Kelola Booking & Operasional Lapangan */}
         {activeTab === "bookings" && (
-          <div className="space-y-6">
+          <div className="space-y-6 text-left">
+            {/* Header & Export */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="text-left">
-                <span className="text-[10px] uppercase tracking-widest text-accent font-semibold block">Operasional Lapangan</span>
-                <h3 className="font-display font-extrabold text-xl md:text-2xl text-slate-800">Kelola Booking & Legalitas Transaksi</h3>
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-accent font-bold block">
+                  Reservations & Legal Compliance
+                </span>
+                <h3 className="font-display font-extrabold text-xl md:text-2xl text-slate-900">
+                  Kelola Booking & Legalitas Transaksi
+                </h3>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
+                  Verifikasi berkas identitas penyewa, bukti transfer DP 30%, pantau masa sewa, dan konfirmasi unit keluar/masuk.
+                </p>
               </div>
-              <div className="flex items-center space-x-2">
+
+              <div className="flex items-center space-x-2.5 self-start sm:self-auto">
                 <button
                   onClick={handleExportCSV}
-                  className="flex items-center space-x-1.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-xs px-3.5 py-1.5 rounded-xl shadow-xs transition-all cursor-pointer"
+                  className="flex items-center space-x-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
                   title="Unduh Rekap Spreadsheet CSV"
                 >
-                  <Download className="w-3.5 h-3.5 text-red-600" />
+                  <Download className="w-3.5 h-3.5 text-accent" />
                   <span>Export CSV / Excel</span>
                 </button>
-                <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200">
-                  Total: {bookings.length} Pesanan
+                <span className="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                  {bookings.length} Total Reservasi
                 </span>
+              </div>
+            </div>
+
+            {/* 4 KPI Summary Metric Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              {/* Card 1: Total Bookings */}
+              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs">
+                <div className="flex items-center justify-between text-slate-400 mb-1">
+                  <span className="text-[10px] uppercase font-bold tracking-wider">Total Reservasi</span>
+                  <Calendar className="w-4 h-4 text-slate-500" />
+                </div>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-display font-black text-2xl text-slate-900">{bookings.length}</span>
+                  <span className="text-xs text-slate-500 font-medium">Transaksi</span>
+                </div>
+                <span className="text-[10px] text-slate-400 block mt-1">Keseluruhan data booking masuk</span>
+              </div>
+
+              {/* Card 2: Pending Verifikasi */}
+              <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl shadow-xs">
+                <div className="flex items-center justify-between text-amber-700 mb-1">
+                  <span className="text-[10px] uppercase font-bold tracking-wider">Perlu Verifikasi</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                </div>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-display font-black text-2xl text-amber-800">
+                    {bookings.filter(b => b.status === "Pending").length}
+                  </span>
+                  <span className="text-xs text-amber-700 font-semibold">Pesanan Baru</span>
+                </div>
+                <span className="text-[10px] text-amber-600 block mt-1">Menunggu cek DP & identitas</span>
+              </div>
+
+              {/* Card 3: Active in Progress */}
+              <div className="p-4 bg-blue-50/70 border border-blue-200 rounded-2xl shadow-xs">
+                <div className="flex items-center justify-between text-blue-700 mb-1">
+                  <span className="text-[10px] uppercase font-bold tracking-wider">Di Lapangan</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                </div>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-display font-black text-2xl text-blue-800">
+                    {bookings.filter(b => b.status === "Active").length}
+                  </span>
+                  <span className="text-xs text-blue-700 font-semibold">Sedang Jalan</span>
+                </div>
+                <span className="text-[10px] text-blue-600 block mt-1">Armada dalam masa sewa aktif</span>
+              </div>
+
+              {/* Card 4: Completed */}
+              <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl shadow-xs">
+                <div className="flex items-center justify-between text-emerald-700 mb-1">
+                  <span className="text-[10px] uppercase font-bold tracking-wider">Selesai Kembali</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div className="flex items-baseline space-x-2">
+                  <span className="font-display font-black text-2xl text-emerald-800">
+                    {bookings.filter(b => b.status === "Completed").length}
+                  </span>
+                  <span className="text-xs text-emerald-700 font-semibold">Tuntas</span>
+                </div>
+                <span className="text-[10px] text-emerald-600 block mt-1">Unit telah kembali ke pool</span>
               </div>
             </div>
 
@@ -4688,7 +5116,29 @@ export default function AdminDashboard({
 
         {/* TAB 5: Settings */}
         {activeTab === "settings" && (
-          <div className="space-y-6 max-w-4xl text-left bg-slate-50 border border-slate-200 p-6 md:p-8 rounded-3xl">
+          <div className="space-y-6 text-left max-w-6xl">
+            {/* Header & Quick Save */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 border border-slate-200 rounded-2xl shadow-xs">
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-accent font-bold block">
+                  System Preferences & Configuration
+                </span>
+                <h2 className="font-display font-black text-2xl md:text-3xl text-slate-900">
+                  Pengaturan & Konfigurasi Showroom
+                </h2>
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
+                  Konfigurasi kebijakan tarif rental, deposit jaminan, profil showroom, dynamic pricing, dan keamanan sistem.
+                </p>
+              </div>
+
+              <button
+                onClick={handleSaveSettings}
+                className="bg-accent hover:bg-accent-hover text-white font-display font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-md shadow-accent/20 cursor-pointer flex items-center space-x-2 self-start sm:self-auto"
+              >
+                <Check className="w-4 h-4" />
+                <span>Simpan Pengaturan</span>
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               
               {/* Left Column: Tarif & Aturan */}
