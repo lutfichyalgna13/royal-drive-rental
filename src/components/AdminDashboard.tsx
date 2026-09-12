@@ -234,76 +234,7 @@ const initialExpenseRecords: ExpenseRecord[] = [
 ];
 
 
-export interface CustomerRecord {
-  id: string;
-  name: string;
-  phone: string;
-  nik?: string;
-  totalBookings: number;
-  totalSpent: number;
-  status: "VIP" | "Reguler" | "Blacklist";
-  blacklistReason?: string;
-  notes?: string;
-  lastRentedCar?: string;
-  lastRentedDate?: string;
-  createdAt: string;
-}
 
-const initialCustomersList: CustomerRecord[] = [
-  {
-    id: "CUST-001",
-    name: "Rian Prasetyo",
-    phone: "081298765432",
-    nik: "3171021990080001",
-    totalBookings: 4,
-    totalSpent: 4200000,
-    status: "VIP",
-    notes: "Pelanggan setia sejak 2025, pengembalian unit selalu bersih dan tepat waktu.",
-    lastRentedCar: "Toyota Avanza 1.5G",
-    lastRentedDate: "2026-09-10",
-    createdAt: "2025-11-15"
-  },
-  {
-    id: "CUST-002",
-    name: "Budi Gunawan",
-    phone: "081388776655",
-    nik: "3275011985040003",
-    totalBookings: 1,
-    totalSpent: 900000,
-    status: "Blacklist",
-    blacklistReason: "Membawa unit melewati batas waktu 2 hari tanpa kabar, menolak membayar ganti rugi goresan bumper belakang.",
-    notes: "Daftar hitam aktif - jangan terima reservasi tanpa deposit 100% dan penjamin.",
-    lastRentedCar: "Daihatsu Sigra 1.2R",
-    lastRentedDate: "2026-08-20",
-    createdAt: "2026-08-18"
-  },
-  {
-    id: "CUST-003",
-    name: "Siti Rahmawati",
-    phone: "087811223344",
-    nik: "3174091995120002",
-    totalBookings: 2,
-    totalSpent: 2600000,
-    status: "Reguler",
-    notes: "Sewa keluarga akhir pekan ke Bandung.",
-    lastRentedCar: "Mitsubishi Xpander Ultimate",
-    lastRentedDate: "2026-09-02",
-    createdAt: "2026-06-10"
-  },
-  {
-    id: "CUST-004",
-    name: "Hendro Wijaya",
-    phone: "081199887766",
-    nik: "3172051988070004",
-    totalBookings: 5,
-    totalSpent: 12500000,
-    status: "VIP",
-    notes: "Direktur PT Mahakarya, sewa Alphard dan Camry untuk tamu korporat bulanan.",
-    lastRentedCar: "Toyota Alphard Executive Lounge",
-    lastRentedDate: "2026-09-08",
-    createdAt: "2025-09-01"
-  }
-];
 
 export interface DriverRecord {
   id: string;
@@ -709,7 +640,11 @@ export default function AdminDashboard({
   setBlogPosts,
   onClose 
 }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<"analytics" | "fleet" | "bookings" | "customers" | "drivers" | "maintenance" | "finance" | "testimonials" | "faqs" | "appearance" | "settings" | "blog">("analytics");
+  const [activeTab, setActiveTab] = useState<"analytics" | "fleet" | "bookings" | "drivers" | "maintenance" | "finance" | "testimonials" | "faqs" | "appearance" | "settings" | "blog">("analytics");
+  const [appearanceSubTab, setAppearanceSubTab] = useState<"all" | "brand" | "hero" | "slideshow">("all");
+  const [newSlideUrlInput, setNewSlideUrlInput] = useState("");
+  const [isAddingSlideUrl, setIsAddingSlideUrl] = useState(false);
+  const [logoInputMode, setLogoInputMode] = useState<"upload" | "url">("upload");
   const [settingsSubTab, setSettingsSubTab] = useState<"rates" | "contact" | "pricing" | "notif" | "security" | "all">("rates");
   const [bookings, setBookings] = useState<BookingRecord[]>(initialBookings);
 
@@ -721,36 +656,7 @@ export default function AdminDashboard({
   const [selectedProofBooking, setSelectedProofBooking] = useState<BookingRecord | null>(null);
   const [selectedDispatchBooking, setSelectedDispatchBooking] = useState<BookingRecord | null>(null);
 
-    // Customer CRM & Blacklist Management State
-  const [customers, setCustomers] = useState<CustomerRecord[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem("royal_drive_customers_v1");
-        if (saved) return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return initialCustomersList;
-  });
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("royal_drive_customers_v1", JSON.stringify(customers));
-      } catch (e) {}
-    }
-  }, [customers]);
-
-  const [customerSearchQuery, setCustomerSearchQuery] = useState("");
-  const [customerStatusFilter, setCustomerStatusFilter] = useState<"all" | "VIP" | "Reguler" | "Blacklist">("all");
-  const [isBlacklistModalOpen, setIsBlacklistModalOpen] = useState(false);
-  const [selectedCustomerForBlacklist, setSelectedCustomerForBlacklist] = useState<CustomerRecord | null>(null);
-  const [blacklistReasonInput, setBlacklistReasonInput] = useState("");
-  const [isAddCustomerModalOpen, setIsAddCustomerModalOpen] = useState(false);
-  const [custNameInput, setCustNameInput] = useState("");
-  const [custPhoneInput, setCustPhoneInput] = useState("");
-  const [custNikInput, setCustNikInput] = useState("");
-  const [custStatusInput, setCustStatusInput] = useState<"VIP" | "Reguler" | "Blacklist">("Reguler");
-  const [custNotesInput, setCustNotesInput] = useState("");
 
   // Smart WhatsApp Template Modal State
   const [selectedWaBooking, setSelectedWaBooking] = useState<BookingRecord | null>(null);
@@ -806,57 +712,7 @@ export default function AdminDashboard({
     }));
   };
 
-  // Auto-sync customer database from incoming bookings
-  useEffect(() => {
-    if (!bookings || bookings.length === 0) return;
-    setCustomers(prev => {
-      const updated = [...prev];
-      bookings.forEach(b => {
-        if (!b.phone) return;
-        const cleanPhone = b.phone.replace(/\D/g, "");
-        const existingIdx = updated.findIndex(
-          c => c.phone.replace(/\D/g, "") === cleanPhone || (b.documents?.ktpNumber && c.nik && c.nik === b.documents.ktpNumber)
-        );
-        if (existingIdx >= 0) {
-          const current = updated[existingIdx];
-          if (!current.lastRentedDate || b.startDate > current.lastRentedDate) {
-            updated[existingIdx] = {
-              ...current,
-              lastRentedCar: b.car,
-              lastRentedDate: b.startDate,
-              totalSpent: current.totalSpent + (b.totalPrice || 0)
-            };
-          }
-        } else {
-          updated.push({
-            id: `CUST-${Date.now().toString().slice(-4)}`,
-            name: b.client,
-            phone: b.phone,
-            nik: b.documents?.ktpNumber || "-",
-            totalBookings: 1,
-            totalSpent: b.totalPrice || 0,
-            status: "Reguler",
-            notes: "Terdaftar otomatis dari pemesanan armada.",
-            lastRentedCar: b.car,
-            lastRentedDate: b.startDate,
-            createdAt: new Date().toISOString().split("T")[0]
-          });
-        }
-      });
-      return updated;
-    });
-  }, [bookings]);
 
-  // Blacklist check helper
-  const getCustomerBlacklist = (phone?: string, nik?: string): CustomerRecord | null => {
-    if (!phone && !nik) return null;
-    const cleanPhone = (phone || "").replace(/\D/g, "");
-    const found = customers.find(c => 
-      c.status === "Blacklist" && 
-      ((cleanPhone && c.phone.replace(/\D/g, "") === cleanPhone) || (nik && c.nik && c.nik === nik))
-    );
-    return found || null;
-  };
 
   // Open Smart WA modal
   const openSmartWaModal = (booking: BookingRecord, type: "dp" | "ready" | "return" | "deposit" = "dp") => {
@@ -2613,15 +2469,6 @@ export default function AdminDashboard({
           badgeColor: "slate"
         },
         { 
-          id: "customers", 
-          label: "Data Pelanggan (CRM)", 
-          icon: <Users className="w-4 h-4" />,
-          badge: customers.filter(c => c.status === "Blacklist").length > 0 
-            ? `${customers.filter(c => c.status === "Blacklist").length} Blacklist` 
-            : null,
-          badgeColor: "rose"
-        },
-        { 
           id: "drivers", 
           label: "Kelola Driver", 
           icon: <UserCheck className="w-4 h-4" />,
@@ -2671,18 +2518,18 @@ export default function AdminDashboard({
     <div className="fixed inset-0 z-50 bg-white flex flex-col md:flex-row h-screen text-slate-600 overflow-hidden font-sans">
       
       {/* MOBILE TOP HEADER BAR (Visible only on mobile/tablet screens) */}
-      <header className="md:hidden bg-slate-900 text-white px-4 py-3 border-b border-slate-800 flex items-center justify-between shrink-0 z-20 shadow-md">
+      <header className="md:hidden bg-white text-slate-800 px-4 py-3 border-b border-slate-200 flex items-center justify-between shrink-0 z-20 shadow-xs">
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 -ml-1.5 text-slate-200 hover:text-white hover:bg-slate-800 active:scale-95 rounded-xl transition-all focus:outline-none cursor-pointer border border-slate-700/60"
+            className="p-2 -ml-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:scale-95 rounded-xl transition-all focus:outline-none cursor-pointer border border-slate-200"
             aria-label="Buka Menu Admin"
           >
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center space-x-2">
             <span className="text-accent">{currentActiveTabObj.icon}</span>
-            <span className="font-display font-bold text-xs uppercase tracking-wider text-slate-100 truncate max-w-[170px]">
+            <span className="font-display font-bold text-xs uppercase tracking-wider text-slate-800 truncate max-w-[170px]">
               {currentActiveTabObj.label}
             </span>
           </div>
@@ -2693,7 +2540,7 @@ export default function AdminDashboard({
           <div className="relative">
             <button
               onClick={() => setIsNotifCenterOpen(!isNotifCenterOpen)}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg relative cursor-pointer transition-colors"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg relative cursor-pointer transition-colors"
               title="Notifikasi Booking"
             >
               <Bell className="w-4 h-4" />
@@ -2708,7 +2555,7 @@ export default function AdminDashboard({
           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping mr-1" title="Online" />
           <button
             onClick={onClose}
-            className="px-2.5 py-1.5 text-rose-400 hover:text-white hover:bg-rose-600 rounded-lg text-[10px] font-display uppercase tracking-wider flex items-center space-x-1.5 cursor-pointer transition-all border border-rose-900/50"
+            className="px-2.5 py-1.5 text-rose-600 hover:text-white hover:bg-rose-600 rounded-lg text-[10px] font-display uppercase tracking-wider flex items-center space-x-1.5 cursor-pointer transition-all border border-rose-200"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Keluar</span>
@@ -2726,24 +2573,24 @@ export default function AdminDashboard({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 md:hidden"
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 md:hidden"
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 250 }}
-              className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-slate-950 border-r border-slate-800 z-50 flex flex-col justify-between p-5 md:hidden shadow-2xl overflow-y-auto text-slate-300"
+              className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white border-r border-slate-200 z-50 flex flex-col justify-between p-5 md:hidden shadow-2xl overflow-y-auto text-slate-700"
             >
               <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-200">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-display font-black text-base shadow-md shadow-amber-500/20">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-display font-black text-base shadow-sm shadow-amber-500/20">
                       RD
                     </div>
                     <div className="text-left">
-                      <span className="font-display font-black text-xs text-white uppercase tracking-wider block">Royal Drive</span>
-                      <span className="text-[10px] text-emerald-400 font-semibold flex items-center space-x-1 mt-0.5">
+                      <span className="font-display font-black text-xs text-slate-900 uppercase tracking-wider block">Royal Drive</span>
+                      <span className="text-[10px] text-emerald-600 font-semibold flex items-center space-x-1 mt-0.5">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping mr-1 inline-block" />
                         Live Console
                       </span>
@@ -2751,7 +2598,7 @@ export default function AdminDashboard({
                   </div>
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                     aria-label="Tutup Menu"
                   >
                     <X className="w-5 h-5" />
@@ -2761,7 +2608,7 @@ export default function AdminDashboard({
                 <nav className="space-y-4">
                   {navGroups.map((grp) => (
                     <div key={grp.group} className="space-y-1">
-                      <div className="px-3 text-[9px] font-bold uppercase tracking-widest text-slate-500">
+                      <div className="px-3 text-[9px] font-bold uppercase tracking-widest text-slate-400">
                         {grp.group}
                       </div>
                       <div className="space-y-0.5">
@@ -2774,27 +2621,27 @@ export default function AdminDashboard({
                                 setActiveTab(tab.id as any);
                                 setIsMobileMenuOpen(false);
                               }}
-                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer text-left ${
+                              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer text-left ${
                                 isActive
-                                  ? "bg-accent text-white font-bold shadow-md shadow-accent/20 border-l-4 border-amber-300"
-                                  : "text-slate-400 hover:text-white hover:bg-slate-900"
+                                  ? "bg-accent text-white font-bold shadow-md shadow-accent/20"
+                                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                               }`}
                             >
                               <div className="flex items-center space-x-3 min-w-0">
-                                <span className={isActive ? "text-white" : "text-slate-400"}>{tab.icon}</span>
+                                <span className={isActive ? "text-white" : "text-slate-500"}>{tab.icon}</span>
                                 <span className="truncate">{tab.label}</span>
                               </div>
                               {tab.badge ? (
                                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ml-2 shrink-0 ${
                                   isActive
-                                    ? "bg-white text-accent font-extrabold"
+                                    ? "bg-white/25 text-white font-extrabold"
                                     : tab.badgeColor === "amber"
-                                      ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                                      ? "bg-amber-100 text-amber-800 border border-amber-200"
                                       : tab.badgeColor === "rose"
-                                        ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                                        ? "bg-rose-100 text-rose-800 border border-rose-200"
                                         : tab.badgeColor === "emerald"
-                                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                          : "bg-slate-800 text-slate-300"
+                                          ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                          : "bg-slate-100 text-slate-700 border border-slate-200"
                                 }`}>
                                   {tab.badge}
                                 </span>
@@ -2808,13 +2655,13 @@ export default function AdminDashboard({
                 </nav>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 mt-6">
+              <div className="pt-4 border-t border-slate-200 mt-6">
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     onClose();
                   }}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-rose-400 hover:text-white hover:bg-rose-600/20 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer font-bold border border-rose-500/30"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-rose-600 hover:text-white hover:bg-rose-600 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer font-bold border border-rose-200 hover:border-rose-600"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Exit Console</span>
@@ -2826,20 +2673,20 @@ export default function AdminDashboard({
       </AnimatePresence>
 
       {/* DESKTOP SIDEBAR (Visible on md and above) */}
-      <aside className="hidden md:flex md:w-68 bg-slate-950 border-r border-slate-800/90 flex-col justify-between p-5 shrink-0 z-10 overflow-y-auto text-slate-300 select-none shadow-2xl">
+      <aside className="hidden md:flex md:w-68 bg-white border-r border-slate-200 flex-col justify-between p-5 shrink-0 z-10 overflow-y-auto text-slate-700 select-none shadow-xs">
         <div className="space-y-6">
           {/* Brand Header */}
-          <div className="p-3.5 bg-slate-900/90 border border-slate-800 rounded-2xl flex items-center space-x-3 shadow-inner">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-display font-black text-base shadow-md shadow-amber-500/20 shrink-0">
+          <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center space-x-3 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-display font-black text-base shadow-sm shadow-amber-500/20 shrink-0">
               RD
             </div>
             <div className="text-left min-w-0">
-              <span className="font-display font-black text-xs text-white uppercase tracking-wider block truncate">
+              <span className="font-display font-black text-xs text-slate-900 uppercase tracking-wider block truncate">
                 ROYAL DRIVE
               </span>
               <div className="flex items-center space-x-1.5 mt-0.5">
                 <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping shrink-0" />
-                <span className="text-[10px] text-emerald-400 font-semibold truncate">Live HQ Console</span>
+                <span className="text-[10px] text-emerald-600 font-bold truncate">Live HQ Console</span>
               </div>
             </div>
           </div>
@@ -2848,7 +2695,7 @@ export default function AdminDashboard({
           <nav className="space-y-4">
             {navGroups.map((group) => (
               <div key={group.group} className="space-y-1">
-                <div className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                <div className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                   {group.group}
                 </div>
                 <div className="space-y-1">
@@ -2858,14 +2705,14 @@ export default function AdminDashboard({
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer text-left ${
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer text-left ${
                           isActive
-                            ? "bg-accent text-white font-bold shadow-lg shadow-accent/20 border-l-4 border-amber-300"
-                            : "text-slate-400 hover:text-white hover:bg-slate-900/80"
+                            ? "bg-accent text-white font-bold shadow-md shadow-accent/20"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
                         }`}
                       >
                         <div className="flex items-center space-x-3 min-w-0">
-                          <span className={isActive ? "text-white" : "text-slate-400"}>
+                          <span className={isActive ? "text-white" : "text-slate-500"}>
                             {tab.icon}
                           </span>
                           <span className="truncate">{tab.label}</span>
@@ -2873,14 +2720,14 @@ export default function AdminDashboard({
                         {tab.badge ? (
                           <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ml-1.5 shrink-0 ${
                             isActive
-                              ? "bg-white text-accent font-extrabold shadow-xs"
+                              ? "bg-white/25 text-white font-extrabold shadow-xs"
                               : tab.badgeColor === "amber"
-                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold"
+                                ? "bg-amber-100 text-amber-800 border border-amber-200 font-bold"
                                 : tab.badgeColor === "rose"
-                                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold"
+                                  ? "bg-rose-100 text-rose-800 border border-rose-200 font-bold"
                                   : tab.badgeColor === "emerald"
-                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
-                                    : "bg-slate-800 text-slate-300 border border-slate-700"
+                                    ? "bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold"
+                                    : "bg-slate-100 text-slate-700 border border-slate-200"
                           }`}>
                             {tab.badge}
                           </span>
@@ -2895,20 +2742,20 @@ export default function AdminDashboard({
         </div>
 
         {/* Sidebar Footer: User Profile & Exit */}
-        <div className="pt-4 border-t border-slate-800/80 mt-6 space-y-3">
-          <div className="flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-left">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
+        <div className="pt-4 border-t border-slate-200 mt-6 space-y-3">
+          <div className="flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-left">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold text-xs shrink-0">
               SA
             </div>
             <div className="min-w-0 flex-1">
-              <span className="font-display font-bold text-xs text-white block truncate">Administrator</span>
-              <span className="text-[10px] text-slate-400 block truncate">Super Admin Console</span>
+              <span className="font-display font-bold text-xs text-slate-900 block truncate">Administrator</span>
+              <span className="text-[10px] text-slate-500 block truncate">Super Admin Console</span>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-rose-400 hover:text-white hover:bg-rose-500/20 rounded-xl font-display text-xs uppercase tracking-wider transition-all border border-rose-500/20 cursor-pointer font-bold"
+            className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl font-display text-xs uppercase tracking-wider transition-all border border-rose-200 cursor-pointer font-bold"
           >
             <LogOut className="w-4 h-4" />
             <span>Exit Console</span>
@@ -4241,12 +4088,6 @@ export default function AdminDashboard({
                         <td className="py-4 px-4">
                           <div className="flex items-center space-x-1.5">
                             <span className="font-semibold text-slate-900 block">{booking.client}</span>
-                            {getCustomerBlacklist(booking.phone, booking.documents?.ktpNumber) && (
-                              <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[8px] font-black bg-rose-600 text-white animate-pulse" title={`DAFTAR HITAM (BLACKLIST): ${getCustomerBlacklist(booking.phone, booking.documents?.ktpNumber)?.blacklistReason || "Penyewa bermasalah"}`}>
-                                <AlertOctagon className="w-2.5 h-2.5" />
-                                <span>BLACKLIST</span>
-                              </span>
-                            )}
                           </div>
                           <a
                             href={`https://wa.me/${booking.phone.replace(/\D/g, "")}`}
@@ -4520,316 +4361,6 @@ export default function AdminDashboard({
 
         {/* TAB: Kelola Driver */}
         
-        {/* ================= DATA PELANGGAN & BLACKLIST ANTI-FRAUD TAB ================= */}
-        {activeTab === "customers" && (
-          <div className="space-y-6 text-left">
-            {/* Header & Quick Add */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <span className="text-[10px] uppercase tracking-widest text-accent font-semibold block">
-                  Customer Relationship Management & Security
-                </span>
-                <h3 className="font-display font-extrabold text-xl md:text-2xl text-slate-800">
-                  Data Pelanggan & Blacklist Anti-Fraud
-                </h3>
-                <p className="text-xs text-slate-500 font-sans mt-0.5">
-                  Basis data seluruh penyewa, riwayat transaksi, penandaan status VIP, dan proteksi blacklist terhadap penyewa bermasalah.
-                </p>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddCustomerModalOpen(true)}
-                  className="flex items-center space-x-2 bg-accent hover:bg-accent-hover text-white font-display font-semibold text-xs uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all focus:outline-none cursor-pointer shadow-md shadow-accent/20"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  <span>+ Tambah Pelanggan</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Metric KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Total Pelanggan</span>
-                <div className="flex items-baseline space-x-2">
-                  <span className="font-display font-black text-2xl text-slate-900">{customers.length}</span>
-                  <span className="text-xs text-slate-500">Orang</span>
-                </div>
-                <span className="text-[10px] text-slate-400 block mt-1">Tersinkronisasi otomatis dari reservasi</span>
-              </div>
-
-              <div className="p-4 bg-amber-50/60 border border-amber-200/80 rounded-2xl shadow-xs">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-amber-700 block mb-1">Pelanggan VIP</span>
-                <div className="flex items-baseline space-x-2">
-                  <span className="font-display font-black text-2xl text-amber-800">
-                    {customers.filter(c => c.status === "VIP").length}
-                  </span>
-                  <span className="text-xs text-amber-700 font-semibold">Prioritas</span>
-                </div>
-                <span className="text-[10px] text-amber-600 block mt-1">Penyewa terpercaya & rutin</span>
-              </div>
-
-              <div className="p-4 bg-rose-50/60 border border-rose-200/80 rounded-2xl shadow-xs">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-rose-700 block mb-1">Daftar Hitam (Blacklist)</span>
-                <div className="flex items-baseline space-x-2">
-                  <span className="font-display font-black text-2xl text-rose-800">
-                    {customers.filter(c => c.status === "Blacklist").length}
-                  </span>
-                  <span className="text-xs text-rose-700 font-semibold">Resiko Tinggi</span>
-                </div>
-                <span className="text-[10px] text-rose-600 block mt-1">Diblokir dari sistem pemesanan</span>
-              </div>
-
-              <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">Total Belanja Pelanggan</span>
-                <div className="flex items-baseline space-x-2">
-                  <span className="font-display font-black text-xl text-emerald-700">
-                    {formatRupiah(customers.reduce((acc, c) => acc + (c.totalSpent || 0), 0))}
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-400 block mt-1">Akumulasi sewa armada</span>
-              </div>
-            </div>
-
-            {/* Filter & Search Bar */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center space-x-1.5 overflow-x-auto w-full sm:w-auto">
-                {[
-                  { id: "all", label: "Semua", count: customers.length },
-                  { id: "VIP", label: "VIP Prioritas", count: customers.filter(c => c.status === "VIP").length },
-                  { id: "Reguler", label: "Reguler", count: customers.filter(c => c.status === "Reguler").length },
-                  { id: "Blacklist", label: "Blacklist", count: customers.filter(c => c.status === "Blacklist").length },
-                ].map(st => (
-                  <button
-                    key={st.id}
-                    onClick={() => setCustomerStatusFilter(st.id as any)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                      customerStatusFilter === st.id
-                        ? st.id === "Blacklist"
-                          ? "bg-rose-600 text-white shadow-xs"
-                          : st.id === "VIP"
-                          ? "bg-amber-600 text-white shadow-xs"
-                          : "bg-slate-900 text-white shadow-xs"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    {st.label} ({st.count})
-                  </button>
-                ))}
-              </div>
-
-              <div className="relative w-full sm:w-72">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Cari nama, nomor WA, NIK..."
-                  value={customerSearchQuery}
-                  onChange={(e) => setCustomerSearchQuery(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 pl-8 pr-3 py-2 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-accent"
-                />
-              </div>
-            </div>
-
-            {/* Customers Table */}
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto shadow-sm">
-              <table className="w-full text-left border-collapse min-w-[900px]">
-                <thead>
-                  <tr className="border-b border-slate-200 font-display text-[9px] uppercase tracking-widest text-slate-500 bg-slate-50">
-                    <th className="py-4 px-4">Nama Pelanggan</th>
-                    <th className="py-4 px-4">Kontak & NIK</th>
-                    <th className="py-4 px-4">Riwayat Sewa</th>
-                    <th className="py-4 px-4">Unit Terakhir</th>
-                    <th className="py-4 px-4">Status & Catatan</th>
-                    <th className="py-4 px-4 text-right">Aksi Manajemen</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs text-slate-700 font-sans">
-                  {customers
-                    .filter(c => {
-                      if (customerStatusFilter !== "all" && c.status !== customerStatusFilter) return false;
-                      if (customerSearchQuery.trim()) {
-                        const q = customerSearchQuery.toLowerCase();
-                        return (
-                          c.name.toLowerCase().includes(q) ||
-                          c.phone.includes(q) ||
-                          (c.nik && c.nik.includes(q)) ||
-                          (c.notes && c.notes.toLowerCase().includes(q))
-                        );
-                      }
-                      return true;
-                    })
-                    .map(cust => (
-                      <tr key={cust.id} className={`hover:bg-slate-50/80 transition-colors ${cust.status === "Blacklist" ? "bg-rose-50/30" : ""}`}>
-                        {/* Nama */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center space-x-2.5">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
-                              cust.status === "Blacklist"
-                                ? "bg-rose-100 text-rose-700"
-                                : cust.status === "VIP"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-slate-100 text-slate-700"
-                            }`}>
-                              {cust.name.slice(0, 2).toUpperCase()}
-                            </div>
-                            <div>
-                              <strong className="text-slate-900 block text-xs">{cust.name}</strong>
-                              <span className="text-[10px] text-slate-400 font-mono">ID: {cust.id}</span>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Kontak & NIK */}
-                        <td className="py-3.5 px-4">
-                          <div className="space-y-0.5">
-                            <a
-                              href={`https://wa.me/${cust.phone.replace(/\D/g, "")}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-slate-700 hover:text-emerald-700 font-medium flex items-center space-x-1"
-                            >
-                              <Phone className="w-3 h-3 text-emerald-600" />
-                              <span>{cust.phone}</span>
-                            </a>
-                            <span className="text-[10px] text-slate-400 block font-mono">
-                              NIK: {cust.nik || "-"}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Riwayat Sewa */}
-                        <td className="py-3.5 px-4">
-                          <div>
-                            <span className="font-bold text-slate-800 block">{cust.totalBookings}x Transaksi</span>
-                            <span className="text-[11px] text-emerald-600 font-semibold block">
-                              {formatRupiah(cust.totalSpent)}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Unit Terakhir */}
-                        <td className="py-3.5 px-4">
-                          <div>
-                            <span className="font-medium text-slate-800 block text-xs">{cust.lastRentedCar || "-"}</span>
-                            <span className="text-[10px] text-slate-400 block">
-                              {cust.lastRentedDate ? `Tgl: ${cust.lastRentedDate}` : "-"}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Status & Catatan */}
-                        <td className="py-3.5 px-4 max-w-xs">
-                          <div className="space-y-1">
-                            {cust.status === "VIP" && (
-                              <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                <Sparkles className="w-3 h-3 text-amber-600" />
-                                <span>VIP Prioritas</span>
-                              </span>
-                            )}
-                            {cust.status === "Reguler" && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-700">
-                                Reguler
-                              </span>
-                            )}
-                            {cust.status === "Blacklist" && (
-                              <div className="space-y-1">
-                                <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                                  <AlertOctagon className="w-3 h-3 text-rose-600" />
-                                  <span>BLACKLIST AKTIF</span>
-                                </span>
-                                {cust.blacklistReason && (
-                                  <p className="text-[10px] text-rose-700 font-normal leading-tight italic bg-rose-50 p-1 rounded border border-rose-200">
-                                    "{cust.blacklistReason}"
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                            {cust.notes && cust.status !== "Blacklist" && (
-                              <p className="text-[10px] text-slate-500 line-clamp-1">{cust.notes}</p>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Aksi */}
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end space-x-1.5">
-                            {cust.status !== "VIP" && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, status: "VIP" } : c));
-                                }}
-                                className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
-                                title="Jadikan Pelanggan VIP"
-                              >
-                                Set VIP
-                              </button>
-                            )}
-
-                            {cust.status !== "Reguler" && cust.status !== "Blacklist" && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, status: "Reguler" } : c));
-                                }}
-                                className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-medium transition-colors cursor-pointer"
-                                title="Ubah ke Reguler"
-                              >
-                                Set Reguler
-                              </button>
-                            )}
-
-                            {cust.status !== "Blacklist" ? (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedCustomerForBlacklist(cust);
-                                  setBlacklistReasonInput("");
-                                  setIsBlacklistModalOpen(true);
-                                }}
-                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-[10px] font-bold transition-colors cursor-pointer flex items-center space-x-1"
-                                title="Tandai sebagai Blacklist (Anti-Fraud)"
-                              >
-                                <UserX className="w-3 h-3" />
-                                <span>Blacklist</span>
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (confirm(`Pulihkan status pelanggan ${cust.name} dari Blacklist menjadi Reguler?`)) {
-                                    setCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, status: "Reguler", blacklistReason: undefined } : c));
-                                  }
-                                }}
-                                className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-bold transition-colors cursor-pointer flex items-center space-x-1"
-                                title="Buka Blokir Blacklist"
-                              >
-                                <Check className="w-3 h-3" />
-                                <span>Pulihkan</span>
-                              </button>
-                            )}
-
-                            <a
-                              href={`https://wa.me/${cust.phone.replace(/\D/g, "")}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="p-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
-                              title="Chat WhatsApp"
-                            >
-                              <MessageSquare className="w-3.5 h-3.5" />
-                            </a>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
         {activeTab === "drivers" && (
           <div className="space-y-8 text-left">
             {/* Header & Add Button */}
@@ -5933,9 +5464,9 @@ export default function AdminDashboard({
 
         {/* TAB 8.5: Kelola Tampilan */}
         {activeTab === "appearance" && (
-          <div className="space-y-8 text-left">
+          <div className="space-y-6 text-left max-w-6xl mx-auto">
             {/* Header with Title & Action Buttons */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
               <div>
                 <span className="text-[10px] uppercase tracking-widest text-accent font-bold block">
                   Branding & Visual Presentation
@@ -5944,15 +5475,15 @@ export default function AdminDashboard({
                   Kelola Tampilan & Banner Showroom
                 </h2>
                 <p className="text-xs text-slate-500 font-sans mt-0.5">
-                  Sesuaikan teks sambutan hero, logo identitas showroom, dan galeri latar belakang bergerak secara realtime.
+                  Atur identitas brand showroom, logo resmi, teks sambutan hero, dan galeri banner latar belakang beranda.
                 </p>
               </div>
 
-              <div className="flex items-center space-x-2.5 self-start sm:self-auto">
+              <div className="flex items-center space-x-2.5 self-start sm:self-auto shrink-0">
                 <button
                   type="button"
                   onClick={handleResetAppearance}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all border border-slate-200 cursor-pointer flex items-center space-x-1.5"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all border border-slate-200 cursor-pointer flex items-center space-x-1.5"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Reset Default</span>
@@ -5960,7 +5491,7 @@ export default function AdminDashboard({
                 <button
                   type="button"
                   onClick={handleSaveAppearance}
-                  className="px-5 py-2.5 bg-accent hover:bg-accent-hover text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-accent/20 cursor-pointer flex items-center space-x-1.5"
+                  className="px-5 py-2 bg-accent hover:bg-accent-hover text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-accent/20 cursor-pointer flex items-center space-x-1.5"
                 >
                   <Check className="w-4 h-4" />
                   <span>Simpan Perubahan Tampilan</span>
@@ -5968,106 +5499,94 @@ export default function AdminDashboard({
               </div>
             </div>
 
-            {/* 2-Column Grid: Hero Text & Logo Showroom */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left Column (7 cols): Hero Text */}
-              <div className="lg:col-span-7 p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <div className="flex items-center space-x-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-display font-bold text-sm text-slate-900">1. Teks Overlay Banner Hero</h3>
-                      <p className="text-[11px] text-slate-500">Judul dan sub-judul utama di halaman depan</p>
-                    </div>
+            {/* Sub-Tab Navigation Bar */}
+            <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none">
+              {[
+                { id: "all", label: "Tampilkan Semua", icon: <Sliders className="w-3.5 h-3.5" /> },
+                { id: "brand", label: "1. Identitas & Logo Brand", icon: <Image className="w-3.5 h-3.5" /> },
+                { id: "hero", label: "2. Teks Banner Hero Utama", icon: <Sparkles className="w-3.5 h-3.5" /> },
+                { id: "slideshow", label: `3. Background Slideshow (${bgImages.length})`, icon: <Grid className="w-3.5 h-3.5" /> },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setAppearanceSubTab(tab.id as any)}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    appearanceSubTab === tab.id
+                      ? "bg-slate-900 text-white shadow-xs"
+                      : "bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/80"
+                  }`}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* SECTION 1: Identitas & Logo Brand Showroom */}
+            {(appearanceSubTab === "all" || appearanceSubTab === "brand") && (
+              <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-6">
+                <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+                    <Image className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-base text-slate-900">1. Identitas Brand & Logo Showroom</h3>
+                    <p className="text-xs text-slate-500">Nama resmi dan logo showroom yang tampil pada navbar, faktur, dan perjanjian sewa.</p>
                   </div>
                 </div>
 
-                <div className="space-y-4 text-xs font-sans">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
-                      Judul Banner Utama (Hero Title)
-                    </label>
-                    <input
-                      type="text"
-                      value={heroTitle}
-                      onChange={(e) => setHeroTitle(e.target.value)}
-                      placeholder="Contoh: Sewa Mobil Mewah & Lepas Kunci Tangerang"
-                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
-                      Sub-judul Banner Utama (Hero Subtitle)
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={heroSubtitle}
-                      onChange={(e) => setHeroSubtitle(e.target.value)}
-                      placeholder="Masukkan deskripsi singkat daya tarik armada dan layanan showroom..."
-                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors resize-none"
-                      required
-                    />
-                  </div>
-
-                  {/* Live Realistic Preview Box */}
-                  <div className="pt-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                      Pratinjau Tampilan Di Website:
-                    </span>
-                    <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-left relative overflow-hidden shadow-inner">
-                      <div className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[9px] font-bold uppercase tracking-wider mb-2">
-                        <span>Royal Fleet Experience</span>
-                      </div>
-                      <h4 className="font-display font-black text-sm md:text-base text-white leading-tight">
-                        {heroTitle || "Sewa Mobil Mewah & Lepas Kunci Tangerang"}
-                      </h4>
-                      <p className="text-[11px] text-slate-300 mt-1 line-clamp-2 leading-relaxed">
-                        {heroSubtitle || "Armada terlengkap, unit prima terawat, harga transparan, dan sopir profesional berpengalaman."}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column (5 cols): Logo & Brand Identity */}
-              <div className="lg:col-span-5 p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-4 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center space-x-2.5 border-b border-slate-100 pb-3 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center font-bold">
-                      <Image className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-display font-bold text-sm text-slate-900">2. Identitas Brand & Logo</h3>
-                      <p className="text-[11px] text-slate-500">Logo resmi showroom pada navbar & nota</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 text-xs font-sans">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Kolom Kiri: Input Nama & Upload Logo */}
+                  <div className="lg:col-span-6 space-y-5 text-xs">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
-                        Nama Brand Showroom
+                      <label className="text-xs font-bold text-slate-700 block">
+                        Nama Resmi Showroom / Brand:
                       </label>
                       <input
                         type="text"
                         value={brandName}
                         onChange={(e) => setBrandName(e.target.value)}
                         placeholder="Contoh: ROYAL DRIVE"
-                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors font-medium"
                       />
+                      <p className="text-[11px] text-slate-400">Nama ini digunakan pada kop surat faktur kuitansi, surat perjanjian, dan WhatsApp.</p>
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
-                        Upload Berkas Logo (PNG / JPG / SVG)
-                      </label>
-                      <div className="flex items-center space-x-2">
-                        <label className="flex-1 flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 px-4 rounded-xl cursor-pointer transition-all shadow-xs">
-                          <UploadCloud className="w-4 h-4 text-amber-400" />
-                          <span>Pilih Berkas Logo</span>
+                    <div className="space-y-3 pt-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 block">
+                          Logo Showroom:
+                        </label>
+                        <div className="flex items-center space-x-1 bg-slate-100 p-0.5 rounded-lg">
+                          <button
+                            type="button"
+                            onClick={() => setLogoInputMode("upload")}
+                            className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all cursor-pointer ${
+                              logoInputMode === "upload" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                            }`}
+                          >
+                            Upload File
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setLogoInputMode("url")}
+                            className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all cursor-pointer ${
+                              logoInputMode === "url" ? "bg-white text-slate-900 shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                            }`}
+                          >
+                            Input Link URL
+                          </button>
+                        </div>
+                      </div>
+
+                      {logoInputMode === "upload" ? (
+                        <label className="border-2 border-dashed border-slate-300 hover:border-accent bg-slate-50/60 hover:bg-slate-50 rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all group">
+                          <div className="w-10 h-10 rounded-full bg-amber-50 text-accent flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                            <UploadCloud className="w-5 h-5" />
+                          </div>
+                          <span className="text-xs font-bold text-slate-800">Klik untuk upload file gambar logo</span>
+                          <span className="text-[11px] text-slate-400 mt-0.5">Format didukung: PNG, JPG, SVG, WebP (Rekomendasi PNG transparan)</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -6075,163 +5594,312 @@ export default function AdminDashboard({
                               const file = e.target.files?.[0];
                               if (file) {
                                 try {
-                                  const compressed = await compressImage(file, 600, 300, 0.75);
+                                  const compressed = await compressImage(file, 600, 300, 0.85);
                                   setLogoUrl(compressed);
                                 } catch (err) {
                                   console.error(err);
-                                  alert("Gagal mengunggah logo.");
+                                  alert("Gagal memproses gambar logo.");
                                 }
                               }
                             }}
                             className="hidden"
                           />
                         </label>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
-                        Atau Masukkan URL Gambar Logo
-                      </label>
-                      <input
-                        type="text"
-                        value={logoUrl}
-                        onChange={(e) => setLogoUrl(e.target.value)}
-                        placeholder="Contoh: https://domain.com/logo.png"
-                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Navbar Simulator Preview */}
-                <div className="pt-3 border-t border-slate-100">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                    Pratinjau Di Navbar Website:
-                  </span>
-                  <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between shadow-inner">
-                    <div className="flex items-center space-x-2.5 min-w-0">
-                      {logoUrl ? (
-                        <img src={logoUrl} className="h-8 max-w-[130px] object-contain" alt="Logo Preview" />
                       ) : (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 font-black text-xs flex items-center justify-center shadow-xs">
-                            RD
-                          </div>
-                          <span className="font-display font-black text-xs text-white uppercase tracking-wider truncate">
-                            {brandName || "ROYAL DRIVE"}
+                        <div className="space-y-1.5">
+                          <input
+                            type="text"
+                            value={logoUrl}
+                            onChange={(e) => setLogoUrl(e.target.value)}
+                            placeholder="https://domain.com/images/logo-showroom.png"
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors"
+                          />
+                          <p className="text-[11px] text-slate-400">Masukkan tautan URL langsung ke file gambar logo showroom Anda.</p>
+                        </div>
+                      )}
+
+                      {logoUrl && (
+                        <div className="flex items-center justify-between pt-1">
+                          <span className="text-[11px] text-emerald-600 font-semibold flex items-center space-x-1">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Logo kustom aktif digunakan</span>
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => setLogoUrl("")}
+                            className="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
+                          >
+                            Hapus Logo & Gunakan Inisial RD
+                          </button>
                         </div>
                       )}
                     </div>
-                    {logoUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setLogoUrl("")}
-                        className="text-[10px] font-bold text-rose-400 hover:text-white bg-rose-500/20 hover:bg-rose-600 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
-                      >
-                        Reset Logo
-                      </button>
-                    )}
+                  </div>
+
+                  {/* Kolom Kanan: Pratinjau Navbar Nyata */}
+                  <div className="lg:col-span-6 bg-slate-50 border border-slate-200/80 rounded-xl p-4.5 space-y-4 text-xs">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                      Pratinjau Logo Pada Bilah Navigasi Publik:
+                    </span>
+
+                    {/* Pratinjau Mode Gelap Mewah */}
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-semibold text-slate-400">Tampilan Pada Navbar Hitam Mewah:</span>
+                      <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between shadow-inner">
+                        <div className="flex items-center space-x-3">
+                          {logoUrl ? (
+                            <img src={logoUrl} className="h-7 max-w-[130px] object-contain" alt="Logo" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-display font-black text-xs shadow-xs">
+                              RD
+                            </div>
+                          )}
+                          <span className="font-display font-black text-xs text-white uppercase tracking-wider">
+                            {brandName || "ROYAL DRIVE"}
+                          </span>
+                        </div>
+                        <div className="hidden sm:flex items-center space-x-3 text-[10px] text-slate-400 font-medium">
+                          <span className="text-accent font-bold">Beranda</span>
+                          <span>Armada</span>
+                          <span>Kontak</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pratinjau Mode Terang */}
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-semibold text-slate-400">Tampilan Pada Navbar Terang / Dokumen:</span>
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between shadow-2xs">
+                        <div className="flex items-center space-x-3">
+                          {logoUrl ? (
+                            <img src={logoUrl} className="h-7 max-w-[130px] object-contain" alt="Logo" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-slate-900 text-amber-400 flex items-center justify-center font-display font-black text-xs">
+                              RD
+                            </div>
+                          )}
+                          <span className="font-display font-black text-xs text-slate-900 uppercase tracking-wider">
+                            {brandName || "ROYAL DRIVE"}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 font-mono">Invoice / Nota Preview</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Slideshow Images Section */}
-            <div className="p-6 bg-white border border-slate-200/90 rounded-2xl shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                <div className="flex items-center space-x-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold">
-                    <Grid className="w-4 h-4" />
+            {/* SECTION 2: Teks Banner Hero Utama */}
+            {(appearanceSubTab === "all" || appearanceSubTab === "hero") && (
+              <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-6">
+                <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center font-bold shrink-0">
+                    <Sparkles className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-display font-bold text-sm text-slate-900">3. Background Slideshow Banner</h3>
-                      <span className="text-[10px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">
-                        {bgImages.length} Slide Aktif
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-500">Gambar latar belakang yang berputar otomatis di halaman beranda</p>
+                    <h3 className="font-display font-bold text-base text-slate-900">2. Teks Banner Hero Utama</h3>
+                    <p className="text-xs text-slate-500">Judul headline dan kalimat pembuka utama di bagian atas halaman beranda.</p>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <label className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs">
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Upload Slide Baru</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          try {
-                            const compressed = await compressImage(file, 1200, 800, 0.65);
-                            setBgImages([...bgImages, compressed]);
-                          } catch (err) {
-                            console.error(err);
-                            alert("Gagal memproses gambar latar belakang.");
-                          }
-                        }
-                      }}
-                      className="hidden"
-                    />
-                  </label>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Kolom Kiri: Input Judul & Sub-judul */}
+                  <div className="lg:col-span-6 space-y-4 text-xs">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700 block">
+                        Judul Utama Banner (Hero Title): *
+                      </label>
+                      <input
+                        type="text"
+                        value={heroTitle}
+                        onChange={(e) => setHeroTitle(e.target.value)}
+                        placeholder="Contoh: Sewa Mobil Mewah & Lepas Kunci Tangerang"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors font-medium"
+                      />
+                      <p className="text-[11px] text-slate-400">Gunakan judul yang memikat, memuat kata kunci kota dan jenis rental Anda.</p>
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newUrl = prompt("Masukkan URL Gambar Latar Belakang Baru (Unsplash/Direct Link):");
-                      if (newUrl && newUrl.trim()) {
-                        setBgImages([...bgImages, newUrl.trim()]);
-                      }
-                    }}
-                    className="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer border border-slate-200"
-                  >
-                    <span>Input Link URL</span>
-                  </button>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700 block">
+                        Sub-judul Tagline Sambutan (Hero Subtitle): *
+                      </label>
+                      <textarea
+                        rows={4}
+                        value={heroSubtitle}
+                        onChange={(e) => setHeroSubtitle(e.target.value)}
+                        placeholder="Masukkan deskripsi singkat keunggulan armada dan layanan showroom..."
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3.5 py-2.5 rounded-xl font-sans text-xs focus:outline-none focus:border-accent focus:bg-white transition-colors leading-relaxed"
+                      />
+                      <p className="text-[11px] text-slate-400">Rangkuman 2-3 kalimat mengenai kelebihan armada prima, sopir profesional, atau syarat mudah.</p>
+                    </div>
+                  </div>
+
+                  {/* Kolom Kanan: Pratinjau Nyata Hero Banner */}
+                  <div className="lg:col-span-6 space-y-2">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                      Pratinjau Di Halaman Beranda:
+                    </span>
+                    <div className="relative rounded-2xl overflow-hidden border border-slate-800 shadow-md aspect-video flex flex-col justify-end p-5 text-left bg-slate-950">
+                      {bgImages[0] && (
+                        <img
+                          src={bgImages[0]}
+                          alt="Hero Preview"
+                          className="absolute inset-0 w-full h-full object-cover opacity-45"
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
+                      
+                      <div className="relative z-10 space-y-2">
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[9px] font-bold uppercase tracking-wider">
+                          <span>{brandName || "ROYAL DRIVE"} EXPERIENCE</span>
+                        </span>
+                        <h4 className="font-display font-black text-sm sm:text-base md:text-lg text-white leading-tight drop-shadow-sm">
+                          {heroTitle || "Sewa Mobil Mewah & Lepas Kunci Tangerang"}
+                        </h4>
+                        <p className="text-[11px] text-slate-300 line-clamp-2 leading-relaxed">
+                          {heroSubtitle || "Armada terlengkap, unit prima terawat, harga transparan, dan sopir profesional berpengalaman."}
+                        </p>
+                        <div className="pt-1 flex items-center space-x-2">
+                          <span className="px-3 py-1 bg-accent text-white font-bold text-[10px] rounded-lg shadow-xs">
+                            Booking Sekarang
+                          </span>
+                          <span className="px-3 py-1 bg-white/10 text-white font-medium text-[10px] rounded-lg">
+                            Lihat Armada
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Grid of Slide Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
-                {bgImages.map((img, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-2xs flex flex-col justify-between group hover:shadow-md transition-shadow">
-                    <div className="aspect-video w-full bg-slate-200 overflow-hidden relative">
-                      <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="" />
-                      <span className="absolute top-2 left-2 bg-slate-950/80 text-white text-[9px] px-2 py-0.5 rounded-md font-bold backdrop-blur-xs">
-                        Slide {idx + 1} {idx === 0 ? "(Utama)" : ""}
-                      </span>
+            {/* SECTION 3: Background Slideshow Banner */}
+            {(appearanceSubTab === "all" || appearanceSubTab === "slideshow") && (
+              <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center font-bold shrink-0">
+                      <Grid className="w-4.5 h-4.5" />
                     </div>
-                    <div className="p-2.5 flex items-center justify-between border-t border-slate-200 bg-white">
-                      <span className="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">{img}</span>
-                      <button
-                        type="button"
-                        disabled={bgImages.length <= 1}
-                        onClick={() => {
-                          if (confirm("Hapus slide ini dari banner beranda?")) {
-                            setBgImages(bgImages.filter((_, i) => i !== idx));
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-display font-bold text-base text-slate-900">3. Background Slideshow Banner</h3>
+                        <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">
+                          {bgImages.length} Foto Aktif
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500">Koleksi foto latar belakang yang berputar otomatis di halaman utama.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <label className="flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer shadow-xs">
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Upload Foto Baru</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            try {
+                              const compressed = await compressImage(file, 1200, 800, 0.65);
+                              setBgImages([...bgImages, compressed]);
+                            } catch (err) {
+                              console.error(err);
+                              alert("Gagal memproses gambar latar belakang.");
+                            }
                           }
                         }}
-                        className="p-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-                        title="Hapus Slide"
+                        className="hidden"
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingSlideUrl(!isAddingSlideUrl)}
+                      className="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition-all cursor-pointer border border-slate-200"
+                    >
+                      <span>{isAddingSlideUrl ? "Tutup Form URL" : "+ Input Link URL"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Inline URL Input Form */}
+                {isAddingSlideUrl && (
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 animate-in fade-in-50 duration-150">
+                    <span className="text-xs font-bold text-slate-800 block">Tambah Slide dari URL Online:</span>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        value={newSlideUrlInput}
+                        onChange={(e) => setNewSlideUrlInput(e.target.value)}
+                        placeholder="https://images.unsplash.com/photo-..."
+                        className="flex-1 bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-accent"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (newSlideUrlInput.trim()) {
+                            setBgImages([...bgImages, newSlideUrlInput.trim()]);
+                            setNewSlideUrlInput("");
+                            setIsAddingSlideUrl(false);
+                          }
+                        }}
+                        className="px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
                       >
-                        <Trash className="w-3.5 h-3.5" />
+                        Tambah Slide
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                )}
 
-            {/* Bottom Save Bar */}
+                {/* Grid of Slide Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {bgImages.map((img, idx) => (
+                    <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-2xs flex flex-col justify-between group hover:shadow-md transition-shadow">
+                      <div className="aspect-video w-full bg-slate-200 overflow-hidden relative">
+                        <img src={img} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="" />
+                        <span className="absolute top-2 left-2 bg-slate-950/80 text-white text-[9px] px-2 py-0.5 rounded-md font-bold backdrop-blur-xs">
+                          Slide {idx + 1} {idx === 0 ? "(Utama)" : ""}
+                        </span>
+                      </div>
+                      <div className="p-2.5 flex items-center justify-between border-t border-slate-200 bg-white">
+                        <span className="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">{img}</span>
+                        <button
+                          type="button"
+                          disabled={bgImages.length <= 1}
+                          onClick={() => {
+                            if (confirm("Hapus slide ini dari banner beranda?")) {
+                              setBgImages(bgImages.filter((_, i) => i !== idx));
+                            }
+                          }}
+                          className="p-1.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+                          title="Hapus Slide"
+                        >
+                          <Trash className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-xl flex items-center space-x-2 text-blue-800 text-xs">
+                  <AlertCircle className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>Rekomendasi gambar: Rasio aspek 16:9 dengan resolusi minimal 1920x1080px untuk ketajaman optimal di layar desktop & ponsel.</span>
+                </div>
+              </div>
+            )}
+
+            {/* Bottom Sticky Save Bar */}
             <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center space-x-2 text-slate-500 text-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Seluruh pengunjung website akan langsung melihat banner dan logo terbaru setelah disimpan.</span>
               </div>
-              <div className="flex items-center space-x-2.5 self-stretch sm:self-auto">
+              <div className="flex items-center space-x-2.5 self-stretch sm:self-auto shrink-0">
                 <button
                   type="button"
                   onClick={handleResetAppearance}
@@ -7354,24 +7022,7 @@ export default function AdminDashboard({
               </button>
             </div>
 
-            {/* Blacklist Anti-Fraud Warning Banner */}
-            {getCustomerBlacklist(selectedVerificationBooking.phone, selectedVerificationBooking.documents?.ktpNumber) && (
-              <div className="mx-6 mt-6 p-4 bg-rose-50 border-2 border-rose-500 rounded-2xl flex items-start space-x-3 text-rose-900 animate-pulse text-left">
-                <AlertOctagon className="w-6 h-6 text-rose-600 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <span className="font-display font-black text-xs sm:text-sm uppercase tracking-wider block text-rose-800">
-                    ⚠️ PERINGATAN RESIKO TINGGI: PENYEWA INI TERDAFTAR DALAM DAFTAR HITAM (BLACKLIST)!
-                  </span>
-                  <p className="text-xs text-rose-700 font-medium leading-relaxed">
-                    Penyewa ini memiliki catatan pelanggaran:{" "}
-                    <strong>"{getCustomerBlacklist(selectedVerificationBooking.phone, selectedVerificationBooking.documents?.ktpNumber)?.blacklistReason || "Terindikasi masalah pada transaksi sewa sebelumnya."}"</strong>.
-                  </p>
-                  <span className="text-[11px] text-rose-600 font-bold block pt-0.5">
-                    Rekomendasi: TOLAK pesanan ini atau tahan deposit penuh & verifikasi fisik langsung.
-                  </span>
-                </div>
-              </div>
-            )}
+
 
             <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 text-left">
               {/* Kolom Kiri: Pratinjau Dokumen KTP & SIM A */}
@@ -9985,207 +9636,6 @@ export default function AdminDashboard({
         )}
       </AnimatePresence>
 
-
-        {/* ================= MODAL BLACKLIST PELANGGAN ================= */}
-        {isBlacklistModalOpen && selectedCustomerForBlacklist && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white border border-rose-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 text-left animate-in zoom-in-95 duration-150">
-              <div className="flex items-center justify-between pb-3 border-b border-rose-100">
-                <div className="flex items-center space-x-2 text-rose-700">
-                  <UserX className="w-5 h-5 text-rose-600" />
-                  <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">
-                    Tandai Blacklist (Daftar Hitam)
-                  </h4>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsBlacklistModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
-                <span className="text-[11px] text-rose-800 font-bold block">
-                  Nama: {selectedCustomerForBlacklist.name} ({selectedCustomerForBlacklist.phone})
-                </span>
-                <span className="text-[10px] text-rose-600 block">
-                  NIK: {selectedCustomerForBlacklist.nik || "-"}
-                </span>
-                <p className="text-[10px] text-rose-700 leading-relaxed mt-1">
-                  Penyewa yang masuk Blacklist akan memicu tanda bahaya merah setiap kali membuat reservasi atau saat admin memverifikasi pesanan.
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-700 block">
-                  Alasan Blacklist & Riwayat Pelanggaran: *
-                </label>
-                <textarea
-                  rows={3}
-                  value={blacklistReasonInput}
-                  onChange={(e) => setBlacklistReasonInput(e.target.value)}
-                  placeholder="Contoh: Terlambat 2 hari tanpa kabar, menolak membayar ganti rugi goresan bodi mobil, atau indikasi pemalsuan dokumen..."
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-rose-500"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsBlacklistModalOpen(false)}
-                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!blacklistReasonInput.trim()) {
-                      alert("Mohon masukkan alasan blacklist untuk catatan keamanan.");
-                      return;
-                    }
-                    setCustomers(prev => prev.map(c => 
-                      c.id === selectedCustomerForBlacklist.id 
-                        ? { ...c, status: "Blacklist", blacklistReason: blacklistReasonInput.trim() }
-                        : c
-                    ));
-                    setIsBlacklistModalOpen(false);
-                    alert(`Pelanggan ${selectedCustomerForBlacklist.name} berhasil ditandai sebagai BLACKLIST.`);
-                  }}
-                  className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-md shadow-rose-600/20"
-                >
-                  Konfirmasi Blacklist
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ================= MODAL TAMBAH PELANGGAN ================= */}
-        {isAddCustomerModalOpen && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 text-left animate-in zoom-in-95 duration-150">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center space-x-2 text-slate-800">
-                  <UserPlus className="w-5 h-5 text-accent" />
-                  <h4 className="font-display font-extrabold text-sm uppercase tracking-wider">
-                    Tambah Data Pelanggan Baru
-                  </h4>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsAddCustomerModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="space-y-3 text-xs">
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Nama Lengkap Penyewa: *</label>
-                  <input
-                    type="text"
-                    value={custNameInput}
-                    onChange={(e) => setCustNameInput(e.target.value)}
-                    placeholder="Contoh: Budi Prasetyo"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-accent"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="font-semibold text-slate-700 block mb-1">Nomor WhatsApp: *</label>
-                    <input
-                      type="text"
-                      value={custPhoneInput}
-                      onChange={(e) => setCustPhoneInput(e.target.value)}
-                      placeholder="08123456789"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-semibold text-slate-700 block mb-1">NIK KTP (16 Digit):</label>
-                    <input
-                      type="text"
-                      maxLength={16}
-                      value={custNikInput}
-                      onChange={(e) => setCustNikInput(e.target.value)}
-                      placeholder="3171..."
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-accent"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Status Pelanggan:</label>
-                  <select
-                    value={custStatusInput}
-                    onChange={(e) => setCustStatusInput(e.target.value as any)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 focus:outline-none focus:border-accent"
-                  >
-                    <option value="Reguler">Reguler</option>
-                    <option value="VIP">VIP Prioritas</option>
-                    <option value="Blacklist">Blacklist (Daftar Hitam)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="font-semibold text-slate-700 block mb-1">Catatan Khusus (Opsional):</label>
-                  <textarea
-                    rows={2}
-                    value={custNotesInput}
-                    onChange={(e) => setCustNotesInput(e.target.value)}
-                    placeholder="Catatan kebiasaan sewa, alamat, atau penjamin..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 focus:outline-none focus:border-accent"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddCustomerModalOpen(false)}
-                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!custNameInput.trim() || !custPhoneInput.trim()) {
-                      alert("Mohon lengkapi nama dan nomor WhatsApp.");
-                      return;
-                    }
-                    const newCust: CustomerRecord = {
-                      id: `CUST-${Date.now().toString().slice(-4)}`,
-                      name: custNameInput.trim(),
-                      phone: custPhoneInput.trim(),
-                      nik: custNikInput.trim() || "-",
-                      status: custStatusInput,
-                      totalBookings: 0,
-                      totalSpent: 0,
-                      notes: custNotesInput.trim() || "-",
-                      createdAt: new Date().toISOString().split("T")[0]
-                    };
-                    setCustomers(prev => [newCust, ...prev]);
-                    setIsAddCustomerModalOpen(false);
-                    setCustNameInput("");
-                    setCustPhoneInput("");
-                    setCustNikInput("");
-                    setCustNotesInput("");
-                    alert(`Pelanggan ${newCust.name} berhasil ditambahkan.`);
-                  }}
-                  className="flex-1 py-2.5 bg-accent hover:bg-accent-hover text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-md shadow-accent/20"
-                >
-                  Simpan Pelanggan
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ================= MODAL TEMPLATE WHATSAPP CEPAT ================= */}
         {isWaModalOpen && selectedWaBooking && (
