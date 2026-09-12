@@ -1,0 +1,633 @@
+{
+  "brandName": "RENTAL MOBIL",
+  "logoUrl": "/images/logo.png",
+  "heroTitle": "Temukan Mobil Terbaik",
+  "heroSubtitle": "SEWA MOBIL HARIAN, MINGGUAN, BULANAN DENGAN UNIT PRIMA HARGA TERBAIK.",
+  "bgImages": [
+    "/images/hero-banner.webp",
+    "/images/cars/suv-banner.webp",
+    "/images/cars/fleet-banner.webp"
+  ],
+  "whatsappNumber": "6281234567890",
+  "contactPhone": "+62 21-8080-9999",
+  "contactEmail": "support@rentalmobil.id",
+  "showroomAddress": "Sudirman Central Business District (SCBD) Lot 12, Senayan, Jakarta Selatan 12190",
+  "googleMapsLink": "<iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.273641324795!2d106.8124976!3d-6.2275815!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f1505c21fcfd%3A0x6bde3e78a6ff603a!2sSCBD!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\"></iframe>",
+  "instagramUrl": "https://instagram.com",
+  "tiktokUrl": "https://tiktok.com",
+  "facebookUrl": "https://facebook.com",
+  "whatsappTemplate": "Halo Rental Mobil, saya tertarik sewa mobil [Nama Mobil] untuk tanggal [Tanggal]...",
+  "rentalTerms": "- KTP asli & kartu identitas sejenis\n- Surat Izin Mengemudi (SIM A) aktif\n- Deposit jaminan kerusakan wajib\n- Pengembalian unit tepat waktu",
+  "seoTitle": "RENTAL MOBIL | Sewa Mobil Harian, Mingguan & Bulanan",
+  "seoDescription": "Penyedia layanan rental mobil prima lepas kunci dan dengan sopir profesional. Unit terawat, harga terbaik 24 jam.",
+  "seoKeywords": "rental mobil, sewa mobil murah, sewa mobil lepas kunci, rental innova, rental avanza",
+  "cars": [
+    {
+      "id": "toyota-calya",
+      "name": "Toyota Calya 1.2G",
+      "category": "MPV Keluarga",
+      "rating": 4.87,
+      "reviewsCount": 104,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Pertalite",
+      "baggage": 3,
+      "pricePerDay": 320000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 130000,
+      "insurancePricePerDay": 45000,
+      "available": true,
+      "image": "/images/cars/calya.webp",
+      "gallery": [
+        "/images/cars/calya.webp"
+      ]
+    },
+    {
+      "id": "daihatsu-sigra",
+      "name": "Daihatsu Sigra 1.2R Deluxe",
+      "category": "MPV Keluarga",
+      "rating": 4.84,
+      "reviewsCount": 89,
+      "seats": 7,
+      "transmission": "Manual",
+      "fuelType": "Pertalite",
+      "baggage": 3,
+      "pricePerDay": 300000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 130000,
+      "insurancePricePerDay": 40000,
+      "available": true,
+      "image": "/images/cars/sigra.webp",
+      "gallery": [
+        "/images/cars/sigra.webp"
+      ]
+    },
+    {
+      "id": "toyota-avanza",
+      "name": "Toyota Avanza 1.5G",
+      "category": "MPV Keluarga",
+      "rating": 4.88,
+      "reviewsCount": 124,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Pertamax",
+      "baggage": 3,
+      "pricePerDay": 400000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 150000,
+      "insurancePricePerDay": 50000,
+      "available": true,
+      "image": "/images/cars/avanza.webp",
+      "gallery": [
+        "/images/cars/avanza.webp"
+      ]
+    },
+    {
+      "id": "daihatsu-xenia",
+      "name": "Daihatsu Xenia 1.3R",
+      "category": "MPV Keluarga",
+      "rating": 4.85,
+      "reviewsCount": 92,
+      "seats": 7,
+      "transmission": "Manual",
+      "fuelType": "Pertalite",
+      "baggage": 3,
+      "pricePerDay": 350000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 150000,
+      "insurancePricePerDay": 50000,
+      "available": true,
+      "image": "/images/cars/xenia.webp",
+      "gallery": [
+        "/images/cars/xenia.webp"
+      ]
+    },
+    {
+      "id": "mitsubishi-xpander",
+      "name": "Mitsubishi Xpander Ultimate",
+      "category": "MPV Keluarga",
+      "rating": 4.93,
+      "reviewsCount": 148,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Pertamax",
+      "baggage": 3,
+      "pricePerDay": 500000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 180000,
+      "insurancePricePerDay": 75000,
+      "available": true,
+      "image": "/images/cars/xpander.webp",
+      "gallery": [
+        "/images/cars/xpander.webp"
+      ]
+    },
+    {
+      "id": "toyota-innova-reborn",
+      "name": "Toyota Kijang Innova Reborn 2.4G",
+      "category": "MPV Keluarga",
+      "rating": 4.95,
+      "reviewsCount": 210,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Solar (Biosolar)",
+      "baggage": 4,
+      "pricePerDay": 750000,
+      "driverPricePerDay": 250000,
+      "fuelPricePerDay": 250000,
+      "insurancePricePerDay": 100000,
+      "available": true,
+      "image": "/images/cars/innova-reborn.webp",
+      "gallery": [
+        "/images/cars/innova-reborn.webp"
+      ]
+    },
+    {
+      "id": "toyota-innova-zenix",
+      "name": "Toyota Innova Zenix 2.0 Hybrid Q",
+      "category": "MPV Keluarga",
+      "rating": 4.97,
+      "reviewsCount": 184,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Hybrid",
+      "baggage": 4,
+      "pricePerDay": 900000,
+      "driverPricePerDay": 250000,
+      "fuelPricePerDay": 200000,
+      "insurancePricePerDay": 100000,
+      "available": true,
+      "image": "/images/cars/innova-zenix.webp",
+      "gallery": [
+        "/images/cars/innova-zenix.webp"
+      ]
+    },
+    {
+      "id": "suzuki-ertiga",
+      "name": "Suzuki Ertiga Smart Hybrid",
+      "category": "MPV Keluarga",
+      "rating": 4.89,
+      "reviewsCount": 88,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Hybrid",
+      "baggage": 3,
+      "pricePerDay": 450000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 140000,
+      "insurancePricePerDay": 60000,
+      "available": true,
+      "image": "/images/cars/ertiga.webp",
+      "gallery": [
+        "/images/cars/ertiga.webp"
+      ]
+    },
+    {
+      "id": "honda-brio",
+      "name": "Honda Brio RS 1.2",
+      "category": "City Car",
+      "rating": 4.94,
+      "reviewsCount": 175,
+      "seats": 5,
+      "transmission": "Automatic",
+      "fuelType": "Pertamax",
+      "baggage": 2,
+      "pricePerDay": 350000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 120000,
+      "insurancePricePerDay": 50000,
+      "available": true,
+      "image": "/images/cars/brio.webp",
+      "gallery": [
+        "/images/cars/brio.webp"
+      ]
+    },
+    {
+      "id": "toyota-agya",
+      "name": "Toyota Agya GR Sport 1.2",
+      "category": "City Car",
+      "rating": 4.86,
+      "reviewsCount": 84,
+      "seats": 5,
+      "transmission": "Automatic",
+      "fuelType": "Pertamax",
+      "baggage": 2,
+      "pricePerDay": 320000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 110000,
+      "insurancePricePerDay": 40000,
+      "available": true,
+      "image": "/images/cars/agya.webp",
+      "gallery": [
+        "/images/cars/agya.webp"
+      ]
+    },
+    {
+      "id": "daihatsu-ayla",
+      "name": "Daihatsu Ayla 1.2R",
+      "category": "City Car",
+      "rating": 4.83,
+      "reviewsCount": 71,
+      "seats": 5,
+      "transmission": "Manual",
+      "fuelType": "Pertalite",
+      "baggage": 2,
+      "pricePerDay": 280000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 110000,
+      "insurancePricePerDay": 40000,
+      "available": true,
+      "image": "/images/cars/ayla.webp",
+      "gallery": [
+        "/images/cars/ayla.webp"
+      ]
+    },
+    {
+      "id": "mitsubishi-pajero-sport",
+      "name": "Mitsubishi Pajero Sport Dakar 4x2",
+      "category": "SUV Tangguh",
+      "rating": 4.96,
+      "reviewsCount": 162,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Dexlite / Pertamina Dex",
+      "baggage": 4,
+      "pricePerDay": 1100000,
+      "driverPricePerDay": 250000,
+      "fuelPricePerDay": 300000,
+      "insurancePricePerDay": 120000,
+      "available": true,
+      "image": "/images/cars/pajero-sport.webp",
+      "gallery": [
+        "/images/cars/pajero-sport.webp"
+      ]
+    },
+    {
+      "id": "toyota-fortuner",
+      "name": "Toyota Fortuner 2.8 GR Sport",
+      "category": "SUV Tangguh",
+      "rating": 4.95,
+      "reviewsCount": 178,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Dexlite / Pertamina Dex",
+      "baggage": 4,
+      "pricePerDay": 1150000,
+      "driverPricePerDay": 250000,
+      "fuelPricePerDay": 300000,
+      "insurancePricePerDay": 120000,
+      "available": true,
+      "image": "/images/cars/fortuner.webp",
+      "gallery": [
+        "/images/cars/fortuner.webp"
+      ]
+    },
+    {
+      "id": "honda-crv",
+      "name": "Honda CR-V 1.5 Turbo Prestige",
+      "category": "SUV Tangguh",
+      "rating": 4.92,
+      "reviewsCount": 115,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Pertamax Turbo",
+      "baggage": 4,
+      "pricePerDay": 950000,
+      "driverPricePerDay": 250000,
+      "fuelPricePerDay": 250000,
+      "insurancePricePerDay": 100000,
+      "available": true,
+      "image": "/images/cars/crv.webp",
+      "gallery": [
+        "/images/cars/crv.webp"
+      ]
+    },
+    {
+      "id": "toyota-alphard",
+      "name": "Toyota Alphard Executive Lounge 2.5G",
+      "category": "Sedan Mewah / VIP",
+      "rating": 4.98,
+      "reviewsCount": 235,
+      "seats": 7,
+      "transmission": "Automatic",
+      "fuelType": "Pertamax Turbo",
+      "baggage": 4,
+      "pricePerDay": 2200000,
+      "driverPricePerDay": 300000,
+      "fuelPricePerDay": 350000,
+      "insurancePricePerDay": 200000,
+      "available": true,
+      "image": "/images/cars/alphard.webp",
+      "gallery": [
+        "/images/cars/alphard.webp"
+      ]
+    },
+    {
+      "id": "toyota-camry",
+      "name": "Toyota Camry 2.5 Hybrid VIP",
+      "category": "Sedan Mewah / VIP",
+      "rating": 4.93,
+      "reviewsCount": 96,
+      "seats": 5,
+      "transmission": "Automatic",
+      "fuelType": "Hybrid",
+      "baggage": 3,
+      "pricePerDay": 1400000,
+      "driverPricePerDay": 250000,
+      "fuelPricePerDay": 200000,
+      "insurancePricePerDay": 150000,
+      "available": true,
+      "image": "/images/cars/camry.webp",
+      "gallery": [
+        "/images/cars/camry.webp"
+      ]
+    },
+    {
+      "id": "mercedes-benz-s-class",
+      "name": "Mercedes-Benz S-Class S450L VIP",
+      "category": "Sedan Mewah / VIP",
+      "rating": 4.99,
+      "reviewsCount": 142,
+      "seats": 5,
+      "transmission": "Automatic",
+      "fuelType": "Pertamax Turbo",
+      "baggage": 3,
+      "pricePerDay": 4500000,
+      "driverPricePerDay": 400000,
+      "fuelPricePerDay": 450000,
+      "insurancePricePerDay": 300000,
+      "available": true,
+      "image": "/images/cars/s-class.webp",
+      "gallery": [
+        "/images/cars/s-class.webp"
+      ]
+    },
+    {
+      "id": "hyundai-ioniq-5",
+      "name": "Hyundai Ioniq 5 Signature Long Range",
+      "category": "Mobil Listrik (EV)",
+      "rating": 4.95,
+      "reviewsCount": 110,
+      "seats": 5,
+      "transmission": "Automatic",
+      "fuelType": "Electric",
+      "baggage": 3,
+      "pricePerDay": 1250000,
+      "driverPricePerDay": 250000,
+      "fuelPricePerDay": 80000,
+      "insurancePricePerDay": 100000,
+      "available": true,
+      "image": "/images/cars/ioniq5.webp",
+      "gallery": [
+        "/images/cars/ioniq5.webp"
+      ]
+    },
+    {
+      "id": "wuling-air-ev",
+      "name": "Wuling Air EV Long Range",
+      "category": "Mobil Listrik (EV)",
+      "rating": 4.88,
+      "reviewsCount": 86,
+      "seats": 4,
+      "transmission": "Automatic",
+      "fuelType": "Electric",
+      "baggage": 2,
+      "pricePerDay": 450000,
+      "driverPricePerDay": 200000,
+      "fuelPricePerDay": 50000,
+      "insurancePricePerDay": 50000,
+      "available": true,
+      "image": "/images/cars/wuling-air.webp",
+      "gallery": [
+        "/images/cars/wuling-air.webp"
+      ]
+    },
+    {
+      "id": "toyota-hiace",
+      "name": "Toyota Hiace Premio Luxury",
+      "category": "Minibus Wisata",
+      "rating": 4.96,
+      "reviewsCount": 156,
+      "seats": 14,
+      "transmission": "Manual",
+      "fuelType": "Dexlite / Pertamina Dex",
+      "baggage": 6,
+      "pricePerDay": 1300000,
+      "driverPricePerDay": 300000,
+      "fuelPricePerDay": 400000,
+      "insurancePricePerDay": 150000,
+      "available": true,
+      "image": "/images/cars/hiace.webp",
+      "gallery": [
+        "/images/cars/hiace.webp"
+      ]
+    },
+    {
+      "id": "isuzu-elf",
+      "name": "Isuzu Elf Long NLR Microbus",
+      "category": "Minibus Wisata",
+      "rating": 4.9,
+      "reviewsCount": 112,
+      "seats": 19,
+      "transmission": "Manual",
+      "fuelType": "Solar (Biosolar)",
+      "baggage": 6,
+      "pricePerDay": 1450000,
+      "driverPricePerDay": 300000,
+      "fuelPricePerDay": 450000,
+      "insurancePricePerDay": 180000,
+      "available": true,
+      "image": "/images/cars/elf.webp",
+      "gallery": [
+        "/images/cars/elf.webp"
+      ]
+    },
+    {
+      "id": "mercedes-c300-wedding",
+      "name": "Mercedes-Benz C300 White Wedding Edition",
+      "category": "Wedding Car",
+      "rating": 4.99,
+      "reviewsCount": 88,
+      "seats": 4,
+      "transmission": "Automatic",
+      "fuelType": "Pertamax Turbo",
+      "baggage": 2,
+      "pricePerDay": 2500000,
+      "driverPricePerDay": 350000,
+      "fuelPricePerDay": 300000,
+      "insurancePricePerDay": 200000,
+      "available": true,
+      "image": "/images/cars/mercedes-wedding.webp",
+      "gallery": [
+        "/images/cars/mercedes-wedding.webp"
+      ]
+    }
+  ],
+  "categories": [
+    "MPV Keluarga",
+    "City Car",
+    "Minibus Wisata",
+    "SUV Tangguh",
+    "Sedan Mewah / VIP",
+    "Mobil Listrik (EV)",
+    "Wedding Car"
+  ],
+  "testimonials": [
+    {
+      "id": "test-1",
+      "name": "Bambang Sudiro, S.E.",
+      "role": "Direktur PT Graha Sentosa Mandiri",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+      "rating": 5,
+      "text": "Layanan rental terbaik untuk operasional kantor dan tamu dinas di Jakarta & Tangerang. Unit Toyota Innova Reborn & Fortuner yang kami sewa sangat prima, bersih, dan harum. Driver sangat profesional, paham etika VIP, dan tepat waktu.",
+      "videoThumb": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=400",
+      "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    },
+    {
+      "id": "test-2",
+      "name": "Nadia Utami, S.I.Kom.",
+      "role": "Travel & Lifestyle Content Creator",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200",
+      "rating": 5,
+      "text": "Sewa lepas kunci Honda Brio RS & Avanza di sini sangat memuaskan! Proses booking online dan verifikasi syarat cepat tanpa ribet via online. Mobil lincah, AC dingin, dan konsumsi BBM sangat irit selama keliling Tangerang & Jakarta."
+    },
+    {
+      "id": "test-3",
+      "name": "Hendra Wijaya",
+      "role": "Owner PT Citra Logistik",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+      "rating": 5,
+      "text": "Kami sekeluarga sewa Toyota Alphard HEV untuk acara pernikahan keluarga. Unit sangat mewah, interior senyap, dan suspensinya nyaman untuk orang tua. Pelayanan admin 24 jam sangat ramah dan responsif saat koordinasi penjemputan.",
+      "videoThumb": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=400",
+      "videoUrl": "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    },
+    {
+      "id": "test-4",
+      "name": "dr. Aris Munandar, Sp.PD.",
+      "role": "Dokter Spesialis & Konsultan",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
+      "rating": 5,
+      "text": "Sudah langganan sewa bulanan unit Innova Zenix untuk mobilitas antar rumah sakit. Unit selalu diservis rutin tepat waktu, surat-surat kendaraan lengkap, dan jika butuh sopir pengganti selalu siap standby."
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Apa saja persyaratan utama sewa mobil lepas kunci?",
+      "answer": "Untuk sewa lepas kunci (tanpa sopir), Anda wajib menyerahkan foto KTP, SIM A aktif, bukti kepemilikan media sosial aktif (LinkedIn/Instagram), serta menyetujui penempatan deposit jaminan. Proses verifikasi dokumen memerlukan waktu maksimal 1x24 jam sebelum unit dikirim."
+    },
+    {
+      "question": "Apakah tarif sewa sudah termasuk bahan bakar (BBM) dan tol?",
+      "answer": "Secara default, harga sewa dasar belum termasuk BBM, tol, parkir, dan makan sopir (bila menggunakan driver). Namun, kami menyediakan paket tambahan 'Fuel Cover' dan 'Driver Full Service' dalam kalkulator harga interaktif kami untuk kemudahan perjalanan Anda."
+    },
+    {
+      "question": "Bagaimana kebijakan asuransi kerusakan kendaraan?",
+      "answer": "Seluruh armada Royal Drive dilindungi oleh asuransi All-Risk komprehensif. Jika terjadi kerusakan akibat kecelakaan, penyewa yang mengambil opsi proteksi penuh hanya dikenakan biaya klaim risiko sendiri (own risk) flat sebesar Rp 300.000 per kejadian, dan sisanya ditanggung penuh oleh pihak asuransi."
+    },
+    {
+      "question": "Apakah mobil bisa diantar langsung ke Bandara atau Hotel?",
+      "answer": "Ya. Kami melayani pengantaran dan penjemputan unit secara gratis untuk area perkotaan Jakarta, Bandung, Surabaya, dan Bali. Untuk pengantaran langsung ke Bandara, staf logistik kami akan stand-by di titik drop-off terminal kedatangan sesuai jadwal penerbangan Anda."
+    },
+    {
+      "question": "Bagaimana proses pengembalian dana deposit jaminan?",
+      "answer": "Uang deposit jaminan (security deposit) akan dikembalikan secara penuh via transfer bank dalam waktu maksimal 3 hari kerja setelah unit dikembalikan, setelah dipastikan tidak ada denda tilang elektronik (e-TLE) atau kerusakan eksterior/interior baru pada unit."
+    }
+  ],
+  "blogPosts": [
+    {
+      "id": "blog-1",
+      "title": "5 Tips Berkendara Aman Menggunakan Mobil Transmisi Matik",
+      "category": "Tips",
+      "date": "28 Juli 2026",
+      "snippet": "Bagi pemula maupun pengemudi kawakan, pahami cara kerja sistem pemindah daya modern untuk kenyamanan dan efisiensi bahan bakar maksimal.",
+      "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      "id": "blog-2",
+      "title": "Destinasi Road Trip Keluarga Terbaik di Jalur Pantai Selatan Jawa",
+      "category": "Wisata",
+      "date": "25 Juli 2026",
+      "snippet": "Temukan pantai-pantai eksotis yang belum terjamah di sepanjang Pansela menggunakan mobil MPV keluarga yang tangguh.",
+      "image": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      "id": "blog-3",
+      "title": "Ulasan Fitur Keselamatan Kijang Innova Reborn Diesel",
+      "category": "Otomotif",
+      "date": "20 Juli 2026",
+      "snippet": "Kupas tuntas kehandalan suspensi double wishbone dan efisiensi mesin common rail turbo diesel pada seri Kijang terfavorit.",
+      "image": "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=800"
+    }
+  ],
+  "pricingSeasons": [
+    {
+      "id": "season-weekend",
+      "name": "Tarif Akhir Pekan (Weekend Surcharge)",
+      "type": "weekend",
+      "surchargePercent": 10,
+      "isActive": true,
+      "description": "Penyesuaian tarif permintaan tinggi hari Sabtu & Minggu (+10%)."
+    },
+    {
+      "id": "season-nataru",
+      "name": "Peak Season Libur Nataru",
+      "type": "peak_season",
+      "startDate": "2026-12-20",
+      "endDate": "2027-01-05",
+      "surchargePercent": 30,
+      "isActive": true,
+      "description": "Puncak liburan Natal dan Tahun Baru sewa mobil keluarga (+30%)."
+    },
+    {
+      "id": "season-mudik",
+      "name": "Paket Mudik Hari Raya Idul Fitri",
+      "type": "peak_season",
+      "startDate": "2027-03-20",
+      "endDate": "2027-04-05",
+      "surchargePercent": 40,
+      "isActive": true,
+      "description": "Musim mudik lebaran antar-provinsi / silaturahmi keluarga tahunan (+40%)."
+    }
+  ],
+  "lastUpdated": 1789225707147,
+  "drivers": [
+    {
+      "id": "DRV-001",
+      "name": "Bpk. Joko Santoso",
+      "phone": "081233445566",
+      "simNumber": "920488192001",
+      "simType": "SIM B1 Umum",
+      "simExpiry": "2028-05-14",
+      "status": "On Trip",
+      "rating": 4.95,
+      "totalTrips": 142,
+      "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
+      "notes": "Pengemudi senior, hafal rute Jabodetabek & Jawa Barat, paham etika tamu VIP."
+    },
+    {
+      "id": "DRV-002",
+      "name": "Bpk. Bambang Pamungkas",
+      "phone": "081288990011",
+      "simNumber": "880192847162",
+      "simType": "SIM A",
+      "simExpiry": "2027-11-20",
+      "status": "Standby",
+      "rating": 4.9,
+      "totalTrips": 88,
+      "avatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+      "notes": "Pengemudi ramah, disiplin waktu, mahir mobil matic & manual."
+    },
+    {
+      "id": "DRV-003",
+      "name": "Bpk. Asep Hendra",
+      "phone": "085711223344",
+      "simNumber": "771029384756",
+      "simType": "SIM A",
+      "simExpiry": "2029-01-18",
+      "status": "Standby",
+      "rating": 4.88,
+      "totalTrips": 64,
+      "avatarUrl": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200",
+      "notes": "Sangat sabar dan telaten untuk perjalanan keluarga santai & wisata."
+    }
+  ]
+}
