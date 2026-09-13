@@ -2026,10 +2026,14 @@ export default function AdminDashboard({
   };
 
   // Change Admin Password
-  const handleChangeAdminPassword = (e: React.FormEvent) => {
+  const handleChangeAdminPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAdminPass.trim()) {
       alert("Password baru tidak boleh kosong!");
+      return;
+    }
+    if (newAdminPass.trim().length < 6) {
+      alert("Password baru minimal harus 6 karakter!");
       return;
     }
     if (newAdminPass !== confirmAdminPass) {
@@ -2037,42 +2041,40 @@ export default function AdminDashboard({
       return;
     }
 
-    // Verify current password
-    let currentValid = false;
     try {
-      const savedAuth = localStorage.getItem("royal_drive_admin_auth_v1");
-      if (savedAuth) {
-        const parsed = JSON.parse(savedAuth);
-        if (parsed.passwordHash) {
-          currentValid = btoa(currAdminPass.trim()) === parsed.passwordHash;
-        } else if (parsed.password) {
-          currentValid = currAdminPass.trim() === parsed.password;
-        }
-      } else {
-        currentValid = currAdminPass.trim() === "admin";
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          currentPassword: currAdminPass.trim(),
+          newPassword: newAdminPass.trim(),
+          email: adminEmailSetting.trim().toLowerCase(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.message || "Gagal memperbarui password administrator.");
+        return;
       }
+
+      // Save new credentials
+      const newAuth = {
+        email: adminEmailSetting.trim().toLowerCase(),
+        passwordHash: btoa(newAdminPass.trim()),
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem("royal_drive_admin_auth_v1", JSON.stringify(newAuth));
+      setCurrAdminPass("");
+      setNewAdminPass("");
+      setConfirmAdminPass("");
+      setToastMessage("Kredensial & Password Administrator berhasil diperbarui di server!");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3500);
     } catch {
-      currentValid = currAdminPass.trim() === "admin";
+      alert("Gagal menghubungi server untuk memperbarui password.");
     }
-
-    if (!currentValid) {
-      alert("Password lama yang Anda masukkan salah!");
-      return;
-    }
-
-    // Save new credentials
-    const newAuth = {
-      email: adminEmailSetting.trim().toLowerCase(),
-      passwordHash: btoa(newAdminPass.trim()),
-      updatedAt: new Date().toISOString()
-    };
-    localStorage.setItem("royal_drive_admin_auth_v1", JSON.stringify(newAuth));
-    setCurrAdminPass("");
-    setNewAdminPass("");
-    setConfirmAdminPass("");
-    setToastMessage("Kredensial dan Password Administrator berhasil diperbarui!");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3500);
   };
 
   // Open Form for Adding new car

@@ -48,8 +48,8 @@ export async function POST(request: Request) {
       const inputHash = hashPassword(trimmedPass);
       isPasswordValid = secureCompare(inputHash, settings.adminPasswordHash);
     } else {
-      // Default initial password: admin
-      isPasswordValid = secureCompare(trimmedPass, "admin");
+      // Default initial password: admin or RoyalAdmin#2026 (strong default to avoid Chrome breached password warning)
+      isPasswordValid = secureCompare(trimmedPass, "admin") || secureCompare(trimmedPass, "RoyalAdmin#2026");
     }
 
     const isEmailValid = secureCompare(trimmedEmail, targetEmail);

@@ -236,7 +236,7 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
 
             {/* Info default */}
             <div className="text-[9px] text-slate-600 leading-normal bg-slate-50 p-2.5 rounded-lg border border-slate-200 font-sans">
-              <strong>Info Akses Demo:</strong> Gunakan Email <code className="text-accent font-semibold">admin@royaldrive.com</code> dan Password <code className="text-accent font-semibold">admin</code> untuk masuk.
+              <strong>Info Akses Administrator:</strong> Email <code className="text-accent font-semibold">admin@royaldrive.com</code> | Password: <code className="text-accent font-semibold">RoyalAdmin#2026</code> (atau <code className="text-slate-500">admin</code>).
             </div>
 
             {/* Submit Button */}
