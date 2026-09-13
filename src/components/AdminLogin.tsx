@@ -177,7 +177,7 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@royaldrive.com"
+                placeholder="nama@email.com"
                 className="w-full glass-input px-3.5 py-3 rounded-xl focus:outline-none focus:border-accent text-slate-800 placeholder:text-slate-400 border border-slate-200"
                 required
               />
@@ -232,11 +232,6 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
                   required
                 />
               </div>
-            </div>
-
-            {/* Info default */}
-            <div className="text-[9px] text-slate-600 leading-normal bg-slate-50 p-2.5 rounded-lg border border-slate-200 font-sans">
-              <strong>Info Akses Administrator:</strong> Email <code className="text-accent font-semibold">admin@royaldrive.com</code> | Password: <code className="text-accent font-semibold">RoyalAdmin#2026</code> (atau <code className="text-slate-500">admin</code>).
             </div>
 
             {/* Submit Button */}
