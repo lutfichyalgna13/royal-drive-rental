@@ -348,7 +348,7 @@ export default function FleetSection({
                 onClick={() => setVisibleCount((prev) => prev + 6)}
                 className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-white hover:bg-slate-900 text-slate-800 hover:text-white font-display font-semibold text-xs uppercase tracking-wider border border-slate-200 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group"
               >
-                <span>Tampilkan Lebih Banyak Armada ({filteredCars.length - visibleCount} Unit Lainnya)</span>
+                <span>Tampilkan Lebih Banyak Armada</span>
                 <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform text-accent" />
               </button>
             </div>
