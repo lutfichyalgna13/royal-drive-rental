@@ -53,6 +53,8 @@ export interface SiteSettings {
   blogPosts?: BlogPost[];
   pricingSeasons?: PricingSeason[];
   drivers?: DriverSetting[];
+  adminEmail?: string;
+  adminPasswordHash?: string;
   lastUpdated?: number;
 }
 

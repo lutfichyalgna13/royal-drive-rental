@@ -959,11 +959,25 @@ export default function AdminDashboard({
     playNotificationChime();
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {}
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("royal_drive_admin_session");
+    }
+    onClose();
+  };
+
   const syncSettingsToServer = (partial: Record<string, any>) => {
     try {
       fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ ...partial, lastUpdated: Date.now() }),
       }).catch((err) => console.warn("Sync to server failed:", err));
     } catch {}
@@ -973,7 +987,6 @@ export default function AdminDashboard({
     setCars(newCars);
     if (typeof window !== "undefined") {
       localStorage.setItem("royal_drive_cars_v5", JSON.stringify(newCars));
-      localStorage.setItem("royal_drive_cars", JSON.stringify(newCars));
     }
     syncSettingsToServer({ cars: newCars });
   };
@@ -981,7 +994,6 @@ export default function AdminDashboard({
   const updateAndSaveCategories = (newCats: string[]) => {
     setCategories(newCats);
     if (typeof window !== "undefined") {
-      localStorage.setItem("royal_drive_categories_v2", JSON.stringify(newCats));
       localStorage.setItem("royal_drive_categories_v1", JSON.stringify(newCats));
     }
     syncSettingsToServer({ categories: newCats });
@@ -1014,11 +1026,12 @@ export default function AdminDashboard({
   const updateAndSaveBookings = (newBookings: BookingRecord[]) => {
     setBookings(newBookings);
     safeSaveBookings(newBookings);
-    // Push updates to centralized server database
+    // Push updates to centralized server database with credentials
     try {
       fetch("/api/bookings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ bookings: newBookings }),
       }).catch(() => {});
     } catch {
@@ -2441,7 +2454,7 @@ export default function AdminDashboard({
 
           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping mr-1" title="Online" />
           <button
-            onClick={onClose}
+            onClick={handleLogout}
             className="px-2.5 py-1.5 text-rose-600 hover:text-white hover:bg-rose-600 rounded-lg text-[10px] font-display uppercase tracking-wider flex items-center space-x-1.5 cursor-pointer transition-all border border-rose-200"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -2546,7 +2559,7 @@ export default function AdminDashboard({
                 <button
                   onClick={() => {
                     setIsMobileMenuOpen(false);
-                    onClose();
+                    handleLogout();
                   }}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-rose-600 hover:text-white hover:bg-rose-600 rounded-xl font-display text-xs uppercase tracking-wider transition-all focus:outline-none cursor-pointer font-bold border border-rose-200 hover:border-rose-600"
                 >
@@ -2641,7 +2654,7 @@ export default function AdminDashboard({
           </div>
 
           <button
-            onClick={onClose}
+            onClick={handleLogout}
             className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl font-display text-xs uppercase tracking-wider transition-all border border-rose-200 cursor-pointer font-bold"
           >
             <LogOut className="w-4 h-4" />

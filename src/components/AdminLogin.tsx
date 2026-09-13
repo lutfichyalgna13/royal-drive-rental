@@ -52,63 +52,71 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
       return;
     }
 
-    // Load admin credentials from localStorage or fallback
-    let validEmail = "admin@royaldrive.com";
-    let isPasswordValid = false;
+    setIsLoading(true);
+    setLoadingStep(1);
 
     try {
-      const savedAuth = typeof window !== "undefined" ? localStorage.getItem("royal_drive_admin_auth_v1") : null;
-      if (savedAuth) {
-        const parsed = JSON.parse(savedAuth);
-        if (parsed.email) validEmail = parsed.email.toLowerCase().trim();
-        if (parsed.passwordHash) {
-          isPasswordValid = btoa(password.trim()) === parsed.passwordHash;
-        } else if (parsed.password) {
-          isPasswordValid = password.trim() === parsed.password;
-        }
-      } else {
-        // Default initial credentials (Owner can customize in Settings tab)
-        isPasswordValid = password.trim() === "admin";
+      // 1. Call Secure Server Authentication API with Rate-Limiting & HttpOnly Cookie
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          email: email.trim(),
+          password: password.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 429) {
+        // Brute force lockout
+        setIsLoading(false);
+        setErrorMsg(data.message || "Terlalu banyak percobaan gagal. Akun dikunci sementara demi keamanan.");
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        return;
       }
-    } catch {
-      isPasswordValid = password.trim() === "admin";
-    }
 
-    // Validate admin credentials
-    if (email.toLowerCase().trim() === validEmail && isPasswordValid) {
-      setIsLoading(true);
-      setLoadingStep(1);
+      if (!res.ok || !data.success) {
+        setIsLoading(false);
+        setErrorMsg(data.message || "Email atau password administrator salah.");
+        setShake(true);
+        setTimeout(() => setShake(false), 500);
+        setPassword("");
+        generateCaptcha();
+        setCaptchaInput("");
+        return;
+      }
 
-      // Record active secure session
+      // Record active session for local reactive components
       try {
         if (typeof window !== "undefined") {
           localStorage.setItem(
             "royal_drive_admin_session",
-            JSON.stringify({ email: validEmail, loginTime: Date.now() })
+            JSON.stringify({ email: data.admin?.email || email.trim(), loginTime: Date.now() })
           );
         }
       } catch (err) {
         console.error(err);
       }
 
-      // Simulated secure handshake steps for premium feel
+      // Simulated secure handshake steps for premium executive feel
       setTimeout(() => {
         setLoadingStep(2);
         setTimeout(() => {
           setLoadingStep(3);
           setTimeout(() => {
             onLoginSuccess();
-          }, 600);
-        }, 800);
-      }, 800);
+          }, 500);
+        }, 600);
+      }, 600);
 
-    } else {
-      setErrorMsg("Email atau Password administrator salah.");
+    } catch (netErr: any) {
+      setIsLoading(false);
+      setErrorMsg("Gagal menghubungi server autentikasi. Silakan periksa koneksi internet Anda.");
       setShake(true);
       setTimeout(() => setShake(false), 500);
-      setPassword("");
-      generateCaptcha();
-      setCaptchaInput("");
     }
   };
 
