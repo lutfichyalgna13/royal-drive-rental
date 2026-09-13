@@ -1,7 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, Users, Eye, ArrowLeftRight, Check, AlertCircle, SlidersHorizontal, RotateCcw } from "lucide-react";
+import { Star, Users, Eye, ArrowLeftRight, Check, AlertCircle, SlidersHorizontal, RotateCcw, ChevronDown } from "lucide-react";
 import { Car, formatRupiah } from "../data/cars";
 import { SearchFilterState } from "./FloatSearch";
 
@@ -47,6 +48,16 @@ export default function FleetSection({
 
   // cars is already filtered strictly by page.tsx (displayedCars)
   const filteredCars = cars;
+
+  // Pagination / progressive display: start with 6 cars instead of immediately dumping 22 cars
+  const [visibleCount, setVisibleCount] = useState(6);
+
+  // Reset visibleCount whenever category tab or search filters change
+  useEffect(() => {
+    setVisibleCount(6);
+  }, [selectedCategory, searchFilters]);
+
+  const visibleCars = filteredCars.slice(0, visibleCount);
 
   const formatCurrency = (val: number) => formatRupiah(val);
 
@@ -186,7 +197,7 @@ export default function FleetSection({
                 className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-6 md:pb-0 pt-2 -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-auto md:w-full"
               >
 
-              {filteredCars.map((car) => (
+              {visibleCars.map((car) => (
                 <div
                   key={car.id}
                   className="group relative flex flex-col rounded-2xl glass-card overflow-hidden h-full w-[84vw] sm:w-[320px] md:w-auto shrink-0 md:shrink snap-center"
@@ -328,6 +339,20 @@ export default function FleetSection({
               <span className="animate-pulse">👉</span>
             </span>
           </div>
+
+          {/* Load More Button */}
+          {filteredCars.length > visibleCount && (
+            <div className="mt-10 md:mt-14 text-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((prev) => prev + 6)}
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-white hover:bg-slate-900 text-slate-800 hover:text-white font-display font-semibold text-xs uppercase tracking-wider border border-slate-200 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer group"
+              >
+                <span>Tampilkan Lebih Banyak Armada ({filteredCars.length - visibleCount} Unit Lainnya)</span>
+                <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform text-accent" />
+              </button>
+            </div>
+          )}
           </>
           )}
         </div>

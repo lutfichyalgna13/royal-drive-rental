@@ -10,7 +10,6 @@ import {
   Sparkles,
   SlidersHorizontal,
   Settings2,
-  CheckCircle2,
 } from "lucide-react";
 import { Car, carsData, defaultCategories, extractCarBrand, extractCarModel, formatRupiah } from "../data/cars";
 
@@ -235,12 +234,6 @@ export default function FloatSearch({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Live Count Badge */}
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-red-50 text-red-600 border border-red-100 shadow-xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-red-500" />
-              <span>{matchingCars.length} Unit Cocok</span>
-            </span>
-
             {/* Reset Button */}
             {hasActiveFilters && (
               <button
@@ -250,7 +243,7 @@ export default function FloatSearch({
                 title="Reset semua filter pencarian"
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Reset</span>
+                <span>Reset Filter</span>
               </button>
             )}
           </div>
@@ -392,31 +385,29 @@ export default function FloatSearch({
           {/* Bottom Action Row */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="text-xs text-slate-500 hidden sm:flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-              <span>
-                {matchingCars.length > 0 ? (
-                  <>
-                    Menampilkan <strong className="text-slate-800 font-semibold">{matchingCars.length}</strong> unit armada siap sewa
-                  </>
-                ) : (
-                  <span className="text-amber-600 font-medium">
-                    Tidak ada unit yang sesuai kombinasi filter ini
-                  </span>
-                )}
-              </span>
+              {matchingCars.length === 0 ? (
+                <span className="text-amber-600 font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block" />
+                  Tidak ada unit yang sesuai kombinasi filter ini
+                </span>
+              ) : (
+                <span className="text-slate-400">
+                  Temukan armada terbaik sesuai jadwal & preferensi perjalanan Anda
+                </span>
+              )}
             </div>
 
             <button
               type="submit"
               disabled={matchingCars.length === 0}
-              className={`w-full sm:w-auto min-w-[200px] flex items-center justify-center gap-2 font-display font-semibold text-xs py-3 px-7 rounded-xl transition-all duration-300 text-center cursor-pointer shadow-md ${
+              className={`w-full sm:w-auto min-w-[180px] flex items-center justify-center gap-2 font-display font-semibold text-xs py-3 px-7 rounded-xl transition-all duration-300 text-center cursor-pointer shadow-md ${
                 matchingCars.length === 0
                   ? "bg-slate-300 text-slate-500 cursor-not-allowed shadow-none"
                   : "bg-red-600 hover:bg-red-700 text-white shadow-red-600/25 hover:shadow-lg hover:shadow-red-600/35 active:scale-[0.98]"
               }`}
             >
               <Search className="w-4 h-4" />
-              <span>Tampilkan Hasil ({matchingCars.length})</span>
+              <span>Cari Kendaraan</span>
             </button>
           </div>
         </form>
