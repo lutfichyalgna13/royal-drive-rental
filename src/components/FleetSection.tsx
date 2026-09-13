@@ -72,29 +72,29 @@ export default function FleetSection({
       <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-accent/2 rounded-full filter blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/10 w-96 h-96 bg-blue-500/2 rounded-full filter blur-3xl pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
         
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="font-display text-xs uppercase tracking-[0.25em] text-accent font-semibold">
             Armada Eksklusif Kami
           </span>
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
+          <h2 className="font-display font-extrabold text-2xl sm:text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
             Pilih Kendaraan Impian Anda
           </h2>
           <div className="w-12 h-1 bg-accent mx-auto mt-6 rounded-full" />
-          <p className="font-sans font-light text-slate-500 text-sm mt-4 tracking-wide leading-relaxed">
+          <p className="font-sans font-light text-slate-500 text-xs sm:text-sm mt-4 tracking-wide leading-relaxed px-2 sm:px-0">
             Setiap kendaraan dalam garasi kami dirawat secara berkala dengan standar pelayanan tertinggi demi menjamin keamanan dan kenyamanan perjalanan Anda.
           </p>
         </div>
 
         {/* Categories Bar */}
-        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-8">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 md:gap-3 mb-8">
           {allCategoryTabs.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 sm:px-6 py-2 sm:py-2.5 rounded-full font-display text-[11px] sm:text-xs uppercase tracking-wider sm:tracking-widest transition-all duration-300 focus:outline-none cursor-pointer ${
+              className={`px-3.5 sm:px-6 py-1.5 sm:py-2.5 rounded-full font-display text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-widest transition-all duration-300 focus:outline-none cursor-pointer ${
                 selectedCategory === cat
                   ? "bg-accent text-white font-semibold shadow-lg shadow-accent/15"
                   : "bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
@@ -194,13 +194,13 @@ export default function FleetSection({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-6 md:pb-0 pt-2 -mx-6 px-6 md:mx-0 md:px-0 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-auto md:w-full"
+                className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-6 md:pb-0 pt-2 -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-auto md:w-full"
               >
 
               {visibleCars.map((car) => (
                 <div
                   key={car.id}
-                  className="group relative flex flex-col rounded-2xl glass-card overflow-hidden h-full w-[84vw] sm:w-[320px] md:w-auto shrink-0 md:shrink snap-center"
+                  className="group relative flex flex-col rounded-2xl glass-card overflow-hidden h-full w-[82vw] max-w-[320px] sm:w-[320px] md:w-auto shrink-0 md:shrink snap-center"
                 >
                   {/* Image Container with scale zoom */}
                   <div className="relative aspect-video overflow-hidden bg-slate-100">

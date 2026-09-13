@@ -214,11 +214,11 @@ export default function FloatSearch({
   return (
     <div
       id="booking-search"
-      className="relative z-30 max-w-6xl mx-auto px-4 -mt-8 sm:-mt-20 md:-mt-28"
+      className="relative z-30 max-w-6xl mx-auto px-3 sm:px-4 -mt-6 sm:-mt-16 md:-mt-24"
       suppressHydrationWarning
     >
       <div
-        className="bg-white/95 backdrop-blur-md text-slate-800 p-5 sm:p-7 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/80 transition-all"
+        className="bg-white/95 backdrop-blur-md text-slate-800 p-4 sm:p-7 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/80 transition-all"
         suppressHydrationWarning
       >
         {/* Header Bar */}
@@ -251,7 +251,7 @@ export default function FloatSearch({
 
         {/* Filter Form */}
         <form onSubmit={handleSubmit} className="space-y-5" autoComplete="off" suppressHydrationWarning>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4" suppressHydrationWarning>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4" suppressHydrationWarning>
             
             {/* 1. Kategori Dropdown */}
             <div className="space-y-1.5">

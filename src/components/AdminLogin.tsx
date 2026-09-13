@@ -130,7 +130,7 @@ export default function AdminLogin({ onLoginSuccess, onClose }: AdminLoginProps)
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className={`w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-2xl p-6 md:p-8 relative ${
+        className={`w-full max-w-sm sm:max-w-md bg-white border border-slate-200 rounded-2xl shadow-2xl p-5 sm:p-6 md:p-8 relative mx-auto ${
           shake ? "animate-shake" : ""
         }`}
       >

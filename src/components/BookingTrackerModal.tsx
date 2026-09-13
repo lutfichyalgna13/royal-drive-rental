@@ -236,32 +236,32 @@ export default function BookingTrackerModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto print:p-0 print:bg-white">
-        <div className="w-full max-w-3xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden text-left my-4 sm:my-8 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+      <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white">
+        <div className="w-full max-w-3xl bg-white border border-slate-200 rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden text-left my-2 sm:my-8 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[94vh]">
           
           {/* Header */}
-          <div className="p-6 md:p-8 bg-slate-900 text-white relative">
+          <div className="p-4 sm:p-6 md:p-8 bg-slate-900 text-white relative">
             <button
               onClick={onClose}
-              className="absolute top-6 right-6 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer focus:outline-none print:hidden"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer focus:outline-none print:hidden"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             <div className="flex items-center space-x-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-900/40">
-                <Search className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-600 flex items-center justify-center text-white shadow-lg shadow-red-900/40 shrink-0">
+                <Search className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">
+              <div className="min-w-0 pr-8 sm:pr-0">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 block truncate">
                   Portal Pelanggan &bull; Verifikasi 2-Faktor Aman
                 </span>
-                <h2 className="font-display font-black text-xl md:text-2xl text-white">
+                <h2 className="font-display font-black text-lg sm:text-xl md:text-2xl text-white truncate">
                   Lacak Status Booking & Armada
                 </h2>
               </div>
             </div>
-            <p className="text-slate-400 text-xs font-light max-w-xl">
+            <p className="text-slate-400 text-xs font-light max-w-xl leading-relaxed">
               Pantau status verifikasi dokumen KTP, konfirmasi pembayaran DP, kesiapan unit, serta kontak sopir bertugas secara real-time.
             </p>
 

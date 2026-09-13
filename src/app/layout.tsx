@@ -1,5 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#DC2626",
+};
 
 export const metadata: Metadata = {
   title: "RENTAL MOBIL | Sewa Mobil Harian, Mingguan & Bulanan",
@@ -25,9 +33,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" className="overflow-x-hidden max-w-full" suppressHydrationWarning>
       <body
-        className="h-full antialiased bg-primary text-neutral-bg font-sans min-h-screen selection:bg-accent selection:text-primary"
+        className="h-full w-full antialiased bg-primary text-neutral-bg font-sans min-h-screen selection:bg-accent selection:text-primary overflow-x-hidden"
         suppressHydrationWarning
       >
         {children}

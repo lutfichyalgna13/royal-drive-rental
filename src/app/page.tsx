@@ -607,19 +607,19 @@ export default function Home() {
         {/* Dark overlay for readability */}
         <div className="absolute inset-0 bg-slate-950/45 bg-gradient-to-t from-primary via-transparent to-black/35 z-10" />
 
-        <div className="relative max-w-7xl mx-auto w-full px-6 lg:px-16 py-20 sm:py-28 lg:py-36 z-20 flex flex-col items-center justify-center text-center">
+        <div className="relative max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-16 py-16 sm:py-24 lg:py-36 z-20 flex flex-col items-center justify-center text-center">
           {/* Sisi Tengah: Teks & Aksi */}
           <div className="space-y-4 sm:space-y-6 max-w-3xl mx-auto" suppressHydrationWarning>
-            <h1 className="font-display font-black text-3xl sm:text-4xl md:text-6xl lg:text-7xl text-white leading-tight tracking-tight drop-shadow-md">
+            <h1 className="font-display font-black text-2xl sm:text-4xl md:text-5xl lg:text-7xl text-white leading-tight tracking-tight drop-shadow-md">
               {heroTitle}
             </h1>
-            <p className="text-white/95 text-[10px] sm:text-xs md:text-sm uppercase tracking-[0.1em] sm:tracking-[0.2em] font-sans max-w-2xl mx-auto font-semibold drop-shadow">
+            <p className="text-white/95 text-[10px] sm:text-xs md:text-sm uppercase tracking-[0.1em] sm:tracking-[0.2em] font-sans max-w-2xl mx-auto font-semibold drop-shadow px-2 sm:px-0">
               {heroSubtitle}
             </p>
-            <div className="pt-4">
+            <div className="pt-3 sm:pt-4">
               <a
                 href="#fleet"
-                className="inline-block bg-red-600 hover:bg-red-700 text-white font-display font-bold text-xs uppercase tracking-widest px-10 py-4.5 rounded-lg shadow-lg shadow-red-600/25 transition-all duration-300 text-center"
+                className="inline-block bg-red-600 hover:bg-red-700 text-white font-display font-bold text-[11px] sm:text-xs uppercase tracking-widest px-7 sm:px-10 py-3.5 sm:py-4.5 rounded-xl shadow-lg shadow-red-600/25 transition-all duration-300 text-center active:scale-95"
               >
                 Pesan Sekarang
               </a>
@@ -659,17 +659,18 @@ export default function Home() {
         <WhyChooseUs />
 
         {/* À propos Section */}
-        <section id="about" className="py-20 bg-white relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 lg:px-16 flex flex-col lg:flex-row items-center justify-between gap-16">
+        {/* À propos Section */}
+        <section id="about" className="py-16 sm:py-20 bg-white relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-16">
             {/* Sisi Kiri: Deskripsi */}
-            <div className="flex-1 text-left space-y-6 max-w-2xl" suppressHydrationWarning>
-              <h2 className="font-display font-black text-4xl md:text-5xl text-slate-800 tracking-tight">
+            <div className="flex-1 text-left space-y-4 sm:space-y-6 max-w-2xl" suppressHydrationWarning>
+              <h2 className="font-display font-black text-3xl sm:text-4xl md:text-5xl text-slate-800 tracking-tight">
                 Tentang Kami
               </h2>
-              <h3 className="font-display font-bold text-lg md:text-xl text-slate-700 leading-normal">
+              <h3 className="font-display font-bold text-base sm:text-lg md:text-xl text-slate-700 leading-normal">
                 Kami siap mendampingi setiap perjalanan penting Anda dengan standar pelayanan terbaik.
               </h3>
-              <p className="text-slate-500 text-sm font-sans leading-relaxed">
+              <p className="text-slate-500 text-xs sm:text-sm font-sans leading-relaxed">
                 Menghadirkan pilihan unit armada terlengkap dan terawat prima, supir profesional yang ramah, serta kemudahan sistem sewa lepas kunci maupun dengan pengemudi 24 jam demi kenyamanan maksimal perjalanan Anda.
               </p>
             </div>
@@ -701,8 +702,8 @@ export default function Home() {
       </main>
 
       {/* Qualité / Badges Section */}
-      <section className="bg-white border-t border-slate-100 py-12">
-        <div className="max-w-7xl mx-auto px-6 lg:px-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <section className="bg-white border-t border-slate-100 py-10 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {/* Badge 1 */}
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">

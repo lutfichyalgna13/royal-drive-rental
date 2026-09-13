@@ -78,22 +78,22 @@ export default function Blog({ blogPosts }: BlogProps) {
   };
 
   return (
-    <section id="blog" className="py-24 bg-slate-50 relative border-b border-slate-100">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+    <section id="blog" className="py-16 sm:py-24 bg-slate-50 relative border-b border-slate-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
         
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="font-display text-xs uppercase tracking-[0.25em] text-accent font-semibold">
             Jurnal & Inspirasi
           </span>
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
+          <h2 className="font-display font-extrabold text-2xl sm:text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
             Artikel Terkini & Tips
           </h2>
           <div className="w-12 h-1 bg-accent mx-auto mt-6 rounded-full" />
         </div>
 
         {/* Grid cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {blogPosts.map((post) => (
             <article
               key={post.id}
@@ -113,7 +113,7 @@ export default function Blog({ blogPosts }: BlogProps) {
               </div>
 
               {/* Body Content */}
-              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <span className="text-[9px] text-slate-500 font-sans tracking-wide">
                     {post.date}
@@ -148,7 +148,7 @@ export default function Blog({ blogPosts }: BlogProps) {
       <AnimatePresence>
         {selectedPost && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-950/70 backdrop-blur-xs"
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto bg-slate-950/70 backdrop-blur-xs"
             onClick={() => setSelectedPost(null)}
           >
             <motion.div
@@ -157,7 +157,7 @@ export default function Blog({ blogPosts }: BlogProps) {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[90vh] flex flex-col text-left"
+              className="relative w-full max-w-3xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[92vh] flex flex-col text-left"
             >
               {/* Modal Header with Hero Image */}
               <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden bg-slate-900 shrink-0">
@@ -172,31 +172,31 @@ export default function Blog({ blogPosts }: BlogProps) {
                 <button
                   type="button"
                   onClick={() => setSelectedPost(null)}
-                  className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 shadow-md active:scale-95"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 shadow-md active:scale-95"
                   aria-label="Tutup Artikel"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
 
                 {/* Category & Title on Image */}
-                <div className="absolute bottom-4 left-6 right-6 z-10 space-y-1.5">
+                <div className="absolute bottom-3 sm:bottom-4 left-4 sm:left-6 right-4 sm:right-6 z-10 space-y-1 sm:space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full shadow-sm">
+                    <span className="bg-red-600 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2.5 sm:px-3 py-0.5 rounded-full shadow-sm">
                       {selectedPost.category}
                     </span>
-                    <span className="text-white/80 text-[11px] font-medium flex items-center gap-1">
+                    <span className="text-white/80 text-[10px] sm:text-[11px] font-medium flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {selectedPost.readTime || "3 Menit Baca"}
                     </span>
                   </div>
-                  <h2 className="font-display font-black text-lg sm:text-2xl text-white leading-tight drop-shadow-sm">
+                  <h2 className="font-display font-black text-base sm:text-2xl text-white leading-tight drop-shadow-sm">
                     {selectedPost.title}
                   </h2>
                 </div>
               </div>
 
               {/* Scrollable Article Body */}
-              <div className="p-6 sm:p-8 overflow-y-auto space-y-6 text-left">
+              <div className="p-4 sm:p-6 md:p-8 overflow-y-auto space-y-4 sm:space-y-6 text-left">
                 {/* Meta Author & Publish Date */}
                 <div className="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-slate-100 text-xs text-slate-500">
                   <div className="flex items-center gap-2.5">

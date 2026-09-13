@@ -33,36 +33,36 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
   const current = testimonials[index] || testimonials[0];
 
   return (
-    <section id="testimonials" className="py-24 bg-white relative border-b border-slate-100">
-      <div className="max-w-6xl mx-auto px-6">
+    <section id="testimonials" className="py-16 sm:py-24 bg-white relative border-b border-slate-100">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10">
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
           <span className="font-display text-xs uppercase tracking-[0.25em] text-accent font-semibold">
             Testimoni Pelanggan
           </span>
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
+          <h2 className="font-display font-extrabold text-2xl sm:text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
             Apa Kata Mereka?
           </h2>
           <div className="w-12 h-1 bg-accent mx-auto mt-6 rounded-full" />
         </div>
 
         {/* Customer Profile Avatars Bar (Interactive Quick Selector) */}
-        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-10">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-8 sm:mb-10">
           {testimonials.map((item, i) => {
             const isActive = index === i;
             return (
               <button
                 key={item.id || i}
                 onClick={() => setIndex(i)}
-                className={`group relative flex items-center space-x-2.5 px-3.5 py-2 rounded-2xl transition-all duration-300 cursor-pointer border ${
+                className={`group relative flex items-center space-x-2 sm:space-x-2.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl transition-all duration-300 cursor-pointer border ${
                   isActive
                     ? "bg-slate-900 text-white border-slate-900 shadow-md scale-105"
                     : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
                 }`}
                 title={`Pilih profil ulasan ${item.name}`}
               >
-                <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border-2 border-accent shadow-sm">
+                <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden shrink-0 border-2 border-accent shadow-sm">
                   <img
                     src={item.avatar}
                     alt={item.name}
@@ -86,13 +86,13 @@ export default function Testimonials({ testimonials }: TestimonialsProps) {
         </div>
 
         {/* Testimonial Box */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-stretch">
           
           {/* Text Review Card (7 cols) */}
           <div 
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className="lg:col-span-7 bg-slate-50 border border-slate-200/60 p-8 md:p-12 rounded-3xl flex flex-col justify-between relative shadow-sm"
+            className="lg:col-span-7 bg-slate-50 border border-slate-200/60 p-5 sm:p-8 md:p-12 rounded-2xl sm:rounded-3xl flex flex-col justify-between relative shadow-sm"
           >
             <Quote className="absolute top-6 right-8 w-16 h-16 text-slate-200/25 pointer-events-none" />
 

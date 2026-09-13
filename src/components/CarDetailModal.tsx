@@ -101,11 +101,11 @@ export default function CarDetailModal({ car, onClose, onBook, whatsappNumber }:
           className="w-full max-w-7xl bg-primary border border-slate-200 rounded-none md:rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row h-full max-h-[100vh] lg:max-h-[90vh]"
         >
           {/* LEFT PANEL: Media Viewer (Foto Gallery) */}
-          <div className="w-full lg:w-7/12 bg-slate-50 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-slate-200 relative min-h-[40vh] lg:min-h-0">
+          <div className="w-full lg:w-7/12 bg-slate-50 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-slate-200 relative min-h-[28vh] sm:min-h-[38vh] lg:min-h-0">
             {/* Main Media Showcase */}
-            <div className="flex-1 flex flex-col justify-center p-6 relative">
+            <div className="flex-1 flex flex-col justify-center p-4 sm:p-6 relative">
               <div className="w-full h-full flex flex-col justify-center">
-                <div className="aspect-video w-full max-h-[300px] lg:max-h-[400px] rounded-2xl overflow-hidden relative border border-slate-200 shadow-sm">
+                <div className="aspect-video w-full max-h-[260px] sm:max-h-[300px] lg:max-h-[400px] rounded-2xl overflow-hidden relative border border-slate-200 shadow-sm">
                   <img
                     src={car.gallery[activeImage] || car.image}
                     alt={car.name}
@@ -113,12 +113,12 @@ export default function CarDetailModal({ car, onClose, onBook, whatsappNumber }:
                   />
                 </div>
                 {/* Thumbnails */}
-                <div className="flex items-center justify-center space-x-3 mt-6">
+                <div className="flex items-center justify-center space-x-2 sm:space-x-3 mt-4 sm:mt-6">
                   {car.gallery.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setActiveImage(idx)}
-                      className={`w-16 aspect-video rounded-lg overflow-hidden border-2 transition-all cursor-pointer focus:outline-none ${
+                      className={`w-14 sm:w-16 aspect-video rounded-lg overflow-hidden border-2 transition-all cursor-pointer focus:outline-none ${
                         activeImage === idx ? "border-accent scale-105" : "border-transparent opacity-60"
                       }`}
                     >
@@ -133,25 +133,25 @@ export default function CarDetailModal({ car, onClose, onBook, whatsappNumber }:
           {/* RIGHT PANEL: Details & Booking Form */}
           <div className="w-full lg:w-5/12 flex flex-col justify-between overflow-y-auto max-h-full lg:max-h-none">
             {/* Close Header */}
-            <div className="p-6 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10">
+            <div className="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10">
               <div>
                 <span className="text-[10px] uppercase tracking-widest text-accent font-medium">
                   {car.category}
                 </span>
-                <h3 className="font-display font-extrabold text-2xl text-slate-800">
+                <h3 className="font-display font-extrabold text-xl sm:text-2xl text-slate-800">
                   {car.name}
                 </h3>
               </div>
               <button
                 onClick={onClose}
-                className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer focus:outline-none"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer focus:outline-none"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Spec Cards & Form */}
-            <div className="p-6 md:p-8 space-y-8 flex-1">
+            <div className="p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 flex-1">
               
               {/* Detailed Specs Grid */}
               <div className="grid grid-cols-2 gap-4">

@@ -36,19 +36,19 @@ export default function Footer({
   const mapUrl = iframeMatch ? iframeMatch[1] : (googleMapsLink.trim() || "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.273641324795!2d106.8124976!3d-6.2275815!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f1505c21fcfd%3A0x6bde3e78a6ff603a!2sSCBD!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid");
 
   return (
-    <footer className="bg-slate-100 border-t border-slate-200 pt-20 pb-10 relative">
-      <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-16 mb-16">
+    <footer className="bg-slate-100 border-t border-slate-200 pt-16 sm:pt-20 pb-10 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-16 mb-12 sm:mb-16">
         
         {/* COL 1: Brand (4 cols) */}
         <div className="lg:col-span-4 space-y-6">
           <div className="flex items-center space-x-2">
             {logoUrl ? (
-              <img src={logoUrl} className="w-12 h-12 object-contain" alt="Logo" />
+              <img src={logoUrl} className="w-10 h-10 sm:w-12 sm:h-12 object-contain" alt="Logo" />
             ) : (
-              <Award className="w-10 h-10 text-accent" />
+              <Award className="w-8 h-8 sm:w-10 sm:h-10 text-accent" />
             )}
             <div className="flex flex-col">
-              <span className="font-display font-light text-xl tracking-[0.2em] text-slate-800">
+              <span className="font-display font-light text-lg sm:text-xl tracking-[0.15em] sm:tracking-[0.2em] text-slate-800">
                 {brandName}
               </span>
             </div>

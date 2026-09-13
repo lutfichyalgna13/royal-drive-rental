@@ -52,19 +52,19 @@ export default function Navbar({
             : "bg-transparent py-6"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center justify-between">
           {/* Logo Brand */}
           <button
             onClick={() => onNavClick("home")}
-            className="flex items-center space-x-2 group cursor-pointer focus:outline-none"
+            className="flex items-center space-x-2 group cursor-pointer focus:outline-none min-w-0"
           >
             {logoUrl ? (
-              <img src={logoUrl} className="w-12 h-12 object-contain transition-transform duration-300" alt="Logo" />
+              <img src={logoUrl} className="w-10 h-10 sm:w-12 sm:h-12 object-contain transition-transform duration-300 shrink-0" alt="Logo" />
             ) : (
-              <Award className="w-10 h-10 text-accent group-hover:rotate-12 transition-transform duration-300" />
+              <Award className="w-8 h-8 sm:w-10 sm:h-10 text-accent group-hover:rotate-12 transition-transform duration-300 shrink-0" />
             )}
-            <div className="flex flex-col">
-              <span className={`font-display font-light text-xl tracking-[0.2em] transition-colors duration-300 ${
+            <div className="flex flex-col min-w-0">
+              <span className={`font-display font-light text-base sm:text-xl tracking-[0.15em] sm:tracking-[0.2em] transition-colors duration-300 truncate max-w-[190px] sm:max-w-none ${
                 scrolled ? "text-slate-900" : "text-white"
               }`}>
                 {brandName}
@@ -123,7 +123,7 @@ export default function Navbar({
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`lg:hidden transition-colors focus:outline-none cursor-pointer ${
+            className={`lg:hidden transition-colors focus:outline-none cursor-pointer p-1.5 rounded-lg ${
               scrolled ? "text-slate-800 hover:text-red-600" : "text-white hover:text-accent"
             }`}
             aria-label="Toggle Menu"
@@ -140,9 +140,9 @@ export default function Navbar({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-[#090D1A]/95 backdrop-blur-lg lg:hidden flex flex-col justify-center px-8 md:px-16"
+            className="fixed inset-0 z-40 bg-[#090D1A]/95 backdrop-blur-lg lg:hidden flex flex-col justify-start overflow-y-auto px-6 sm:px-12 py-20"
           >
-            <div className="flex flex-col space-y-6">
+            <div className="flex flex-col space-y-6 my-auto">
               {navItems.map((item) => (
                 <button
                   key={item.id}
@@ -150,15 +150,15 @@ export default function Navbar({
                     setMobileMenuOpen(false);
                     onNavClick(item.id);
                   }}
-                  className={`text-left font-display text-lg uppercase tracking-[0.2em] focus:outline-none ${
-                    activeSection === item.id ? "text-accent" : "text-slate-400"
+                  className={`text-left font-display text-base sm:text-lg uppercase tracking-[0.2em] focus:outline-none ${
+                    activeSection === item.id ? "text-accent font-bold" : "text-slate-400"
                   }`}
                 >
                   {item.label}
                 </button>
               ))}
 
-              <div className="h-[1px] bg-white/5 my-4" />
+              <div className="h-[1px] bg-white/10 my-4" />
 
               <div className="flex flex-col space-y-3 pt-2">
                 {onTrackBookingClick && (
@@ -167,7 +167,7 @@ export default function Navbar({
                       setMobileMenuOpen(false);
                       onTrackBookingClick();
                     }}
-                    className="flex items-center justify-center space-x-2 bg-white/10 border border-white/20 text-white font-display font-medium text-sm uppercase tracking-widest px-6 py-3 rounded-full focus:outline-none"
+                    className="flex items-center justify-center space-x-2 bg-white/10 border border-white/20 text-white font-display font-medium text-xs sm:text-sm uppercase tracking-widest px-6 py-3 rounded-full focus:outline-none"
                   >
                     <Search className="w-4 h-4 text-red-400" />
                     <span>Lacak Status Booking</span>
@@ -178,7 +178,7 @@ export default function Navbar({
                     setMobileMenuOpen(false);
                     onDashboardOpen("admin");
                   }}
-                  className="flex items-center justify-center space-x-2 bg-accent text-white font-display font-medium text-sm uppercase tracking-widest px-6 py-3 rounded-full focus:outline-none"
+                  className="flex items-center justify-center space-x-2 bg-accent text-white font-display font-medium text-xs sm:text-sm uppercase tracking-widest px-6 py-3 rounded-full focus:outline-none"
                 >
                   <ShieldAlert className="w-4 h-4" />
                   <span>Admin Console</span>

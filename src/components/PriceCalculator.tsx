@@ -84,29 +84,29 @@ export default function PriceCalculator({ cars, onBook }: PriceCalculatorProps) 
   const formatCurrency = (val: number) => formatRupiah(val);
 
   return (
-    <section id="calculator" className="py-24 bg-white relative border-t border-slate-100">
+    <section id="calculator" className="py-16 sm:py-24 bg-white relative border-t border-slate-100">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(220,38,38,0.01),transparent_50%)] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="font-display text-xs uppercase tracking-[0.25em] text-accent font-semibold">
             Estimator Transparan
           </span>
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
+          <h2 className="font-display font-extrabold text-2xl sm:text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
             Kalkulator Harga Interaktif
           </h2>
           <div className="w-12 h-1 bg-accent mx-auto mt-6 rounded-full" />
-          <p className="font-sans font-light text-slate-500 text-sm mt-4 tracking-wide">
+          <p className="font-sans font-light text-slate-500 text-xs sm:text-sm mt-4 tracking-wide px-2 sm:px-0">
             Sesuaikan durasi sewa, kebutuhan supir, jaminan asuransi, dan aksesoris tambahan untuk melihat rincian biaya real-time.
           </p>
         </div>
 
         {/* Console Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-stretch">
           
           {/* LEFT: Controls (7 cols) */}
-          <div className="lg:col-span-7 bg-slate-50 border border-slate-200/60 p-6 md:p-8 rounded-3xl flex flex-col justify-between space-y-6" suppressHydrationWarning>
+          <div className="lg:col-span-7 bg-slate-50 border border-slate-200/60 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl flex flex-col justify-between space-y-6" suppressHydrationWarning>
             <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-widest flex items-center space-x-2 border-b border-slate-200/60 pb-4">
               <Sliders className="w-4 h-4 text-accent" />
               <span>Konfigurasi Rental</span>
@@ -266,7 +266,7 @@ export default function PriceCalculator({ cars, onBook }: PriceCalculatorProps) 
           </div>
 
           {/* RIGHT: Invoice Summary (5 cols) */}
-          <div className="lg:col-span-5 bg-slate-50 border border-slate-200 p-6 md:p-8 rounded-3xl flex flex-col justify-between shadow-sm">
+          <div className="lg:col-span-5 bg-slate-50 border border-slate-200 p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl flex flex-col justify-between shadow-sm">
             <div className="space-y-6" suppressHydrationWarning>
               <h3 className="font-display font-bold text-sm text-slate-800 uppercase tracking-widest flex items-center space-x-2 border-b border-slate-200/60 pb-4">
                 <Calculator className="w-4 h-4 text-accent" />

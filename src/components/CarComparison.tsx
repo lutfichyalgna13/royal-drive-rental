@@ -226,7 +226,7 @@ export default function CarComparison({
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 z-40 w-[94%] max-w-2xl bg-white/95 backdrop-blur-xl border border-slate-200 p-2.5 sm:p-3.5 rounded-2xl flex items-center justify-between shadow-2xl shadow-slate-900/15 gap-2 sm:gap-4"
+        className="fixed bottom-3 sm:bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 z-40 w-[96%] max-w-2xl bg-white/95 backdrop-blur-xl border border-slate-200 p-2 sm:p-3.5 rounded-2xl flex items-center justify-between shadow-2xl shadow-slate-900/15 gap-1.5 sm:gap-4"
         suppressHydrationWarning
       >
         <div className="flex items-center space-x-2.5 min-w-0">

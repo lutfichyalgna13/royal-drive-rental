@@ -17,22 +17,22 @@ export default function FAQ({ faqs }: FAQProps) {
   };
 
   return (
-    <section id="faq" className="py-24 bg-white relative border-b border-slate-100">
-      <div className="max-w-4xl mx-auto px-6">
+    <section id="faq" className="py-16 sm:py-24 bg-white relative border-b border-slate-100">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
         
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
           <span className="font-display text-xs uppercase tracking-[0.25em] text-accent font-semibold">
             Pusat Informasi
           </span>
-          <h2 className="font-display font-extrabold text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
+          <h2 className="font-display font-extrabold text-2xl sm:text-3xl md:text-5xl text-slate-800 mt-3 tracking-tight">
             Pertanyaan Umum (FAQ)
           </h2>
           <div className="w-12 h-1 bg-accent mx-auto mt-6 rounded-full" />
         </div>
 
         {/* Accordions */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {faqs.map((faq, idx) => {
             const isOpen = activeIndex === idx;
             return (
@@ -42,10 +42,10 @@ export default function FAQ({ faqs }: FAQProps) {
               >
                 <button
                   onClick={() => toggleFAQ(idx)}
-                  className="w-full text-left p-6 flex items-center justify-between focus:outline-none cursor-pointer hover:bg-slate-100/50 transition-colors"
+                  className="w-full text-left p-4 sm:p-6 flex items-center justify-between focus:outline-none cursor-pointer hover:bg-slate-100/50 transition-colors"
                 >
-                  <div className="flex items-center space-x-4 pr-4">
-                    <HelpCircle className="w-5 h-5 text-accent flex-shrink-0" />
+                  <div className="flex items-center space-x-3 sm:space-x-4 pr-3 sm:pr-4">
+                    <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-accent flex-shrink-0" />
                     <span className="font-display font-bold text-xs sm:text-sm text-slate-800">
                       {faq.question}
                     </span>

@@ -28,17 +28,17 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section id="features" className="py-20 bg-[#F5F7FA] relative">
-      <div className="max-w-7xl mx-auto px-6 md:px-8">
+    <section id="features" className="py-16 sm:py-20 bg-[#F5F7FA] relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         
         {/* Header Title (optional or matching the 3 cards grid layout) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {cards.map((card, idx) => (
             <div
               key={idx}
               className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between border border-slate-100/80 group"
             >
-              <div className="p-6 space-y-4">
+              <div className="p-5 sm:p-6 space-y-3 sm:space-y-4">
                 {/* Rounded Icon in red tint */}
                 <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
                   {card.icon}
