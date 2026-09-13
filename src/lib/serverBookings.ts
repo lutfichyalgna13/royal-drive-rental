@@ -75,7 +75,16 @@ export function addServerBooking(newBooking: any): any[] {
   let updated: any[];
   if (existingIndex >= 0) {
     updated = [...current];
-    updated[existingIndex] = newBooking;
+    updated[existingIndex] = {
+      ...current[existingIndex],
+      ...newBooking,
+      paymentProofUrl: newBooking.paymentProofUrl || current[existingIndex].paymentProofUrl,
+      paymentProofTime: newBooking.paymentProofTime || current[existingIndex].paymentProofTime,
+      documents: {
+        ...(current[existingIndex].documents || {}),
+        ...(newBooking.documents || {}),
+      },
+    };
   } else {
     updated = [newBooking, ...current];
   }

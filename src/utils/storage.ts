@@ -150,18 +150,8 @@ export function safeSaveBookings<T extends BookingRecordLike>(bookings: T[]): bo
  */
 export function purgeObsoleteStorageKeys(): void {
   if (typeof window === "undefined") return;
-
   try {
-    // One-time client storage reset requested by user: reset all bookings and revenue to 0
-    const RESET_MARKER = "royal_drive_reset_bookings_20260913_done";
-    if (!localStorage.getItem(RESET_MARKER)) {
-      localStorage.setItem("royal_drive_bookings_v2", JSON.stringify([]));
-      localStorage.removeItem("royal_drive_bookings");
-      localStorage.removeItem("royal_drive_bookings_v1");
-      localStorage.setItem(RESET_MARKER, "true");
-    }
-
-    // Remove obsolete v1 keys if present
+    // Remove obsolete legacy keys if present
     if (localStorage.getItem("royal_drive_bookings")) {
       localStorage.removeItem("royal_drive_bookings");
     }

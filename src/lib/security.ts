@@ -141,6 +141,30 @@ export function isValidEmail(email: unknown): boolean {
 }
 
 /**
+ * Sanitizes image URL or data URI safely, protecting against script injection
+ */
+export function sanitizeImageUrl(input: unknown, maxLength = 2_000_000): string {
+  if (typeof input !== "string") return "";
+  const trimmed = input.trim();
+  // Safe base64 image data URIs
+  if (trimmed.startsWith("data:image/") && trimmed.includes(";base64,")) {
+    const parts = trimmed.split(";base64,");
+    if (parts.length === 2 && /^[A-Za-z0-9+/=]+$/.test(parts[1])) {
+      return trimmed.slice(0, maxLength);
+    }
+  }
+  // Safe HTTP/HTTPS image URLs
+  if (/^https?:\/\/[^\s<>"']+$/i.test(trimmed)) {
+    return trimmed.slice(0, 2048);
+  }
+  // Safe relative paths
+  if (/^\/[A-Za-z0-9_.\-\/%]+$/i.test(trimmed)) {
+    return trimmed.slice(0, 2048);
+  }
+  return "";
+}
+
+/**
  * Deep sanitizes booking payload to prevent any malicious payload injection
  */
 export function sanitizeBooking(body: any): any {
@@ -159,15 +183,19 @@ export function sanitizeBooking(body: any): any {
     durationDays: Math.max(1, Math.min(365, Number(body.durationDays) || 1)),
     totalPrice: Math.max(0, Number(body.totalPrice) || 0),
     depositAmount: Math.max(0, Number(body.depositAmount) || 0),
-    paymentStatus: ["DP Lunas", "Lunas", "Belum Bayar"].includes(body.paymentStatus) ? body.paymentStatus : "Belum Bayar",
+    paymentStatus: ["DP Lunas", "Lunas", "Belum Bayar", "Refund"].includes(body.paymentStatus) ? body.paymentStatus : "Belum Bayar",
     rentalType: ["Lepas Kunci", "Dengan Sopir"].includes(body.rentalType) ? body.rentalType : "Lepas Kunci",
-    status: ["Pending", "Active", "Completed"].includes(body.status) ? body.status : "Pending",
+    status: ["Pending", "Active", "Completed", "Cancelled", "Dibatalkan"].includes(body.status) ? body.status : "Pending",
     pickupLocation: sanitizeString(body.pickupLocation, 200),
+    paymentProofUrl: body.paymentProofUrl ? sanitizeImageUrl(body.paymentProofUrl) : undefined,
+    paymentProofTime: body.paymentProofTime ? sanitizeString(body.paymentProofTime, 100) : undefined,
+    securityDepositStatus: body.securityDepositStatus ? sanitizeString(body.securityDepositStatus, 50) : undefined,
+    driverName: body.driverName ? sanitizeString(body.driverName, 100) : undefined,
     documents: body.documents && typeof body.documents === "object" ? {
       ktpNumber: sanitizeString(body.documents.ktpNumber, 30),
       simNumber: sanitizeString(body.documents.simNumber, 30),
-      ktpUrl: sanitizeString(body.documents.ktpUrl, 2000),
-      simUrl: sanitizeString(body.documents.simUrl, 2000),
+      ktpUrl: sanitizeImageUrl(body.documents.ktpUrl),
+      simUrl: sanitizeImageUrl(body.documents.simUrl),
       emergencyName: sanitizeString(body.documents.emergencyName, 100),
       emergencyPhone: sanitizePhone(body.documents.emergencyPhone),
       emergencyRelation: sanitizeString(body.documents.emergencyRelation, 50),

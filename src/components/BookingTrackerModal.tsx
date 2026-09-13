@@ -217,9 +217,9 @@ export default function BookingTrackerModal({
         // 2. Sync to centralized server API
         try {
           await fetch("/api/bookings", {
-            method: "PUT",
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ bookings: [updated] }),
+            body: JSON.stringify(updated),
           });
         } catch (err) {
           console.error("Failed to sync booking proof to server:", err);

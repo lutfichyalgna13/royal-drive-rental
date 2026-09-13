@@ -12,7 +12,9 @@ export async function GET() {
       { success: true, bookings },
       {
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          Pragma: "no-cache",
+          Expires: "0",
         },
       }
     );
@@ -26,9 +28,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // 1. Rate Limiting: Max 6 booking submissions per 10 minutes per IP (Anti-Spam & DoS)
+    // 1. Rate Limiting: Max 60 submissions per 10 minutes per IP (generous for testing & NAT environments)
     const clientIp = getClientIp(request);
-    const rateCheck = checkRateLimit(`booking_create:${clientIp}`, 6, 10 * 60);
+    const rateCheck = checkRateLimit(`booking_create:${clientIp}`, 60, 10 * 60);
 
     if (!rateCheck.allowed) {
       return NextResponse.json(
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
 
     // 2. Strict Input Sanitization & Anti-XSS Cleaning
     const sanitized = sanitizeBooking(body);
-    if (!sanitized || !sanitized.id || !sanitized.client || !sanitized.phone) {
+    if (!sanitized || !sanitized.id || !sanitized.client) {
       return NextResponse.json(
         { success: false, message: "Data pemesanan tidak lengkap atau format tidak valid." },
         { status: 400 }
@@ -69,23 +71,33 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    // Admin Authentication Check for modifications
+    const body = await request.json();
+
+    // 1. Single Booking Update (e.g. customer uploading payment proof)
+    if (body.id && !body.bookings) {
+      const sanitized = sanitizeBooking(body);
+      if (!sanitized) {
+        return NextResponse.json(
+          { success: false, message: "Format pemesanan tidak valid." },
+          { status: 400 }
+        );
+      }
+      const updated = addServerBooking(sanitized);
+      return NextResponse.json({ success: true, booking: sanitized, bookings: updated });
+    }
+
+    // 2. Bulk Fleet Bookings Replacement requires Admin Authentication
     if (!isAuthenticatedAdmin(request)) {
       return NextResponse.json(
-        { success: false, message: "Akses ditolak: Operasi ini memerlukan autentikasi administrator." },
+        { success: false, message: "Akses ditolak: Operasi pembaruan massal memerlukan autentikasi administrator." },
         { status: 401 }
       );
     }
 
-    const body = await request.json();
     if (body.bookings && Array.isArray(body.bookings)) {
       const sanitizedList = body.bookings.map((b: any) => sanitizeBooking(b)).filter(Boolean);
       writeServerBookings(sanitizedList);
       return NextResponse.json({ success: true, count: sanitizedList.length });
-    } else if (body.id) {
-      const sanitized = sanitizeBooking(body);
-      const updated = addServerBooking(sanitized);
-      return NextResponse.json({ success: true, booking: sanitized, bookings: updated });
     }
 
     return NextResponse.json(

@@ -354,14 +354,15 @@ export default function BookingSuccessModal({
                           setUploadedProof(dataUrl);
                           setIsUploading(false);
 
-                          // Sync to server API and local storage
                           const timeStr = `${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}, ${new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} WIB`;
                           try {
                             fetch("/api/bookings", {
-                              method: "PUT",
+                              method: "POST",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({
-                                bookings: [{ ...booking, paymentProofUrl: dataUrl, paymentProofTime: timeStr }]
+                                ...booking,
+                                paymentProofUrl: dataUrl,
+                                paymentProofTime: timeStr,
                               }),
                             }).catch(() => {});
                           } catch {}

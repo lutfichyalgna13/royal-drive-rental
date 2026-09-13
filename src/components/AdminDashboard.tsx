@@ -831,7 +831,9 @@ export default function AdminDashboard({
           setBookings(prev => {
             const exists = prev.some(b => b.id === incoming.id);
             if (exists) return prev;
-            return [incoming, ...prev];
+            const updated = [incoming, ...prev];
+            safeSaveBookings(updated);
+            return updated;
           });
           setLatestIncomingBooking(incoming);
           setIsIncomingAlertOpen(true);
@@ -846,26 +848,24 @@ export default function AdminDashboard({
         if (e.key === "royal_drive_bookings_v2" && e.newValue) {
           try {
             const parsed = JSON.parse(e.newValue);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setBookings(parsed);
-              const newest = parsed[0];
-              if (newest && newest.status === "Pending") {
-                setLatestIncomingBooking(newest);
-                setIsIncomingAlertOpen(true);
-                const soundPref = localStorage.getItem("royal_drive_notif_sound");
-                if (soundPref !== "false") {
-                  playNotificationChime();
-                }
-                const formattedPrice = new Intl.NumberFormat("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                  maximumFractionDigits: 0
-                }).format(newest.totalPrice);
-                sendDesktopNotification(
-                  "🚨 Pemesanan Sewa Mobil Baru!",
-                  `${newest.client} memesan ${newest.car} (${newest.durationDays} hari - ${formattedPrice})`
-                );
-              }
+            if (Array.isArray(parsed)) {
+              setBookings(prev => {
+                // If parsed is empty but prev has items, do NOT wipe local state
+                if (parsed.length === 0 && prev.length > 0) return prev;
+                // Merge cleanly
+                const map = new Map<string, BookingRecord>();
+                prev.forEach(b => { if (b && b.id) map.set(b.id, b); });
+                parsed.forEach((b: BookingRecord) => {
+                  if (!b || !b.id) return;
+                  const local = map.get(b.id);
+                  map.set(b.id, local ? { ...local, ...b } : b);
+                });
+                return Array.from(map.values()).sort((a, b) => {
+                  const timeA = new Date(a.date || 0).getTime() || 0;
+                  const timeB = new Date(b.date || 0).getTime() || 0;
+                  return timeB - timeA;
+                });
+              });
             }
           } catch (err) {
             console.error(err);
@@ -873,46 +873,120 @@ export default function AdminDashboard({
         }
       };
 
-      // Heartbeat Auto-Sync with Centralized Server API (/api/bookings)
+      // Heartbeat Auto-Sync with Centralized Server API (/api/bookings) with Zero-Loss Bidirectional Merge
       const syncWithServer = async () => {
         try {
-          const res = await fetch("/api/bookings");
-          if (res.ok) {
-            const data = await res.json();
-            if (data.success && Array.isArray(data.bookings)) {
-              if (data.bookings.length > 0) {
-                setBookings(prev => {
-                  // Check if a new booking arrived from server (e.g. booked from a smartphone)
-                  const newest = data.bookings[0];
-                  const alreadyKnown = prev.some(b => b.id === newest.id);
-                  if (!alreadyKnown && newest.status === "Pending") {
-                    setLatestIncomingBooking(newest);
-                    setIsIncomingAlertOpen(true);
-                    const soundPref = localStorage.getItem("royal_drive_notif_sound");
-                    if (soundPref !== "false") {
-                      playNotificationChime();
-                    }
-                    const formattedPrice = new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                      maximumFractionDigits: 0
-                    }).format(newest.totalPrice);
-                    sendDesktopNotification(
-                      "🚨 Pemesanan Sewa Mobil Baru!",
-                      `${newest.client} memesan ${newest.car} (${newest.durationDays} hari - ${formattedPrice})`
-                    );
-                  }
-                  safeSaveBookings(data.bookings);
-                  return data.bookings;
-                });
-              } else {
-                setBookings([]);
-                safeSaveBookings([]);
-              }
+          const res = await fetch("/api/bookings?t=" + Date.now(), {
+            cache: "no-store",
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data.success || !Array.isArray(data.bookings)) return;
+
+          const serverBookings: BookingRecord[] = data.bookings;
+
+          setBookings(prev => {
+            // Case 1: Both server and local are empty -> do nothing
+            if (serverBookings.length === 0 && prev.length === 0) {
+              return prev;
             }
-          }
+
+            // Case 2: Server is empty, but local has bookings (e.g. serverless cold start or container recycled)
+            // CRITICAL: NEVER wipe local bookings! Instead, push local bookings to server to recover state!
+            if (serverBookings.length === 0 && prev.length > 0) {
+              try {
+                fetch("/api/bookings", {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ bookings: prev }),
+                }).catch(() => {});
+              } catch {}
+              return prev;
+            }
+
+            // Case 3: Intelligently MERGE by booking.id (server + local union)
+            const map = new Map<string, BookingRecord>();
+
+            // Populate with existing local bookings
+            prev.forEach(b => {
+              if (b && b.id) map.set(b.id, b);
+            });
+
+            let hasNewPendingFromRemote = false;
+            let newestPendingBooking: BookingRecord | null = null;
+
+            // Merge server bookings into map
+            serverBookings.forEach(sb => {
+              if (!sb || !sb.id) return;
+              const local = map.get(sb.id);
+              if (!local) {
+                // New incoming booking from another device
+                map.set(sb.id, sb);
+                if (sb.status === "Pending") {
+                  hasNewPendingFromRemote = true;
+                  if (!newestPendingBooking) newestPendingBooking = sb;
+                }
+              } else {
+                // Merge: preserve payment proof and combined documents
+                map.set(sb.id, {
+                  ...local,
+                  ...sb,
+                  paymentProofUrl: sb.paymentProofUrl || local.paymentProofUrl,
+                  paymentProofTime: sb.paymentProofTime || local.paymentProofTime,
+                  documents: {
+                    ...(local.documents || {}),
+                    ...(sb.documents || {}),
+                  },
+                });
+              }
+            });
+
+            // Trigger notification for new pending booking from remote
+            if (hasNewPendingFromRemote && newestPendingBooking) {
+              setLatestIncomingBooking(newestPendingBooking);
+              setIsIncomingAlertOpen(true);
+              const soundPref = localStorage.getItem("royal_drive_notif_sound");
+              if (soundPref !== "false") {
+                playNotificationChime();
+              }
+              const formattedPrice = new Intl.NumberFormat("id-ID", {
+                style: "currency",
+                currency: "IDR",
+                maximumFractionDigits: 0
+              }).format((newestPendingBooking as BookingRecord).totalPrice);
+              sendDesktopNotification(
+                "🚨 Pemesanan Sewa Mobil Baru!",
+                `${(newestPendingBooking as BookingRecord).client} memesan ${(newestPendingBooking as BookingRecord).car} (${(newestPendingBooking as BookingRecord).durationDays} hari - ${formattedPrice})`
+              );
+            }
+
+            // Sort newest first
+            const mergedList = Array.from(map.values()).sort((a, b) => {
+              const timeA = new Date(a.date || 0).getTime() || 0;
+              const timeB = new Date(b.date || 0).getTime() || 0;
+              return timeB - timeA;
+            });
+
+            // Check if mergedList is identical to prev to prevent unnecessary re-render loops & storage churn
+            const isIdentical =
+              prev.length === mergedList.length &&
+              prev.every((b, i) =>
+                b.id === mergedList[i].id &&
+                b.status === mergedList[i].status &&
+                b.paymentStatus === mergedList[i].paymentStatus &&
+                b.paymentProofUrl === mergedList[i].paymentProofUrl
+              );
+
+            if (isIdentical) {
+              return prev;
+            }
+
+            safeSaveBookings(mergedList);
+            return mergedList;
+          });
         } catch {
-          // Offline / fallback
+          // Offline / fallback - preserve existing bookings
         }
       };
 
