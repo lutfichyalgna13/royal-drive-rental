@@ -55,3 +55,15 @@ export async function PUT(request: Request) {
     );
   }
 }
+
+export async function DELETE() {
+  try {
+    writeServerBookings([]);
+    return NextResponse.json({ success: true, message: "All bookings cleared successfully", count: 0 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { success: false, message: error?.message || "Failed to clear bookings" },
+      { status: 500 }
+    );
+  }
+}

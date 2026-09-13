@@ -471,125 +471,7 @@ function compressImage(file: File, maxWidth = 1200, maxHeight = 800, quality = 0
   });
 }
 
-const initialBookings: BookingRecord[] = [
-  {
-    id: "BK-9812",
-    client: "Dian Pratama",
-    phone: "081298765432",
-    email: "dian.pratama@gmail.com",
-    car: "Toyota Avanza 1.5G",
-    carPlate: "B 1928 KFL",
-    startDate: "2026-09-12",
-    endDate: "2026-09-15",
-    durationDays: 3,
-    totalPrice: 1200000,
-    depositAmount: 500000,
-    paymentStatus: "DP Lunas",
-    rentalType: "Lepas Kunci",
-    status: "Pending",
-    date: "11 Sep 2026",
-    pickupLocation: "Bandara Soekarno-Hatta (T3)",
-    documents: {
-      ktpNumber: "3171051204920003",
-      simNumber: "920412345678",
-      ktpUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=600",
-      simUrl: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?auto=format&fit=crop&q=80&w=600",
-      emergencyName: "Rina Pratama",
-      emergencyPhone: "081388776655",
-      emergencyRelation: "Istri",
-      socialMedia: "@dianpratama.id",
-      verified: false,
-    },
-  },
-  {
-    id: "BK-9801",
-    client: "Lutfi Utomo",
-    phone: "085712345678",
-    email: "lutfi.utomo@gmail.com",
-    car: "Toyota Innova Zenix Hybrid",
-    carPlate: "B 2049 RYD",
-    startDate: "2026-09-10",
-    endDate: "2026-09-12",
-    durationDays: 2,
-    totalPrice: 1600000,
-    depositAmount: 1600000,
-    paymentStatus: "Lunas",
-    rentalType: "Dengan Sopir",
-    driverName: "Bpk. Joko Santoso (0812-3344-5566)",
-    status: "Active",
-    date: "10 Sep 2026",
-    pickupLocation: "Hotel Mulia Senayan",
-    documents: {
-      ktpNumber: "3273012903880002",
-      simNumber: "880312349988",
-      ktpUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=600",
-      simUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600",
-      emergencyName: "Siti Rahmawati",
-      emergencyPhone: "081299887711",
-      emergencyRelation: "Keluarga",
-      socialMedia: "@lutfi_utomo",
-      verified: true,
-    },
-    inspection: {
-      checkOut: {
-        odometer: 24500,
-        fuelLevel: "Full",
-        scratches: "Baret tipis 2cm di ujung bumper kiri bawah. Interior bersih harum.",
-        itemsChecked: ["STNK Asli", "Kunci Kontak", "Ban Serep", "Dongkrak", "Kotak P3K", "E-Toll"],
-        inspector: "Bpk. Joko Santoso",
-        time: "10 Sep 2026, 08:30 WIB",
-      },
-    },
-  },
-  {
-    id: "BK-9742",
-    client: "Hendra Wijaya",
-    phone: "081399887766",
-    email: "hendra.wijaya@corporate.co.id",
-    car: "Toyota Alphard 2.5G",
-    carPlate: "B 1 RYD",
-    startDate: "2026-09-01",
-    endDate: "2026-09-03",
-    durationDays: 2,
-    totalPrice: 4400000,
-    depositAmount: 4400000,
-    paymentStatus: "Lunas",
-    rentalType: "Dengan Sopir",
-    driverName: "Bpk. Rahmat Supriyadi",
-    status: "Completed",
-    date: "01 Sep 2026",
-    pickupLocation: "Showroom Royal Drive",
-    documents: {
-      ktpNumber: "3174091508850001",
-      simNumber: "850899887766",
-      ktpUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=600",
-      simUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=600",
-      emergencyName: "Ratna Wijaya",
-      emergencyPhone: "081199882233",
-      emergencyRelation: "Istri",
-      socialMedia: "@hendrawijaya",
-      verified: true,
-    },
-    inspection: {
-      checkOut: {
-        odometer: 18200,
-        fuelLevel: "Full",
-        scratches: "Kondisi unit 100% mulus tanpa lecet.",
-        itemsChecked: ["STNK Asli", "Kunci Kontak", "Ban Serep", "Dongkrak", "Kotak P3K", "E-Toll"],
-        inspector: "Bpk. Rahmat Supriyadi",
-        time: "01 Sep 2026, 07:00 WIB",
-      },
-      checkIn: {
-        odometer: 18540,
-        fuelLevel: "Full",
-        newDamages: "Tidak ada kerusakan baru. Kondisi prima.",
-        extraFee: 0,
-        inspector: "Bpk. Rahmat Supriyadi",
-        time: "03 Sep 2026, 20:00 WIB",
-      },
-    },
-  },
-];
+const initialBookings: BookingRecord[] = [];
 
 export default function AdminDashboard({
   cars,
@@ -882,7 +764,7 @@ export default function AdminDashboard({
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
+            if (Array.isArray(parsed)) {
               setBookings(parsed);
             }
           } catch (e) {
@@ -997,31 +879,36 @@ export default function AdminDashboard({
           const res = await fetch("/api/bookings");
           if (res.ok) {
             const data = await res.json();
-            if (data.success && Array.isArray(data.bookings) && data.bookings.length > 0) {
-              setBookings(prev => {
-                // Check if a new booking arrived from server (e.g. booked from a smartphone)
-                const newest = data.bookings[0];
-                const alreadyKnown = prev.some(b => b.id === newest.id);
-                if (!alreadyKnown && newest.status === "Pending") {
-                  setLatestIncomingBooking(newest);
-                  setIsIncomingAlertOpen(true);
-                  const soundPref = localStorage.getItem("royal_drive_notif_sound");
-                  if (soundPref !== "false") {
-                    playNotificationChime();
+            if (data.success && Array.isArray(data.bookings)) {
+              if (data.bookings.length > 0) {
+                setBookings(prev => {
+                  // Check if a new booking arrived from server (e.g. booked from a smartphone)
+                  const newest = data.bookings[0];
+                  const alreadyKnown = prev.some(b => b.id === newest.id);
+                  if (!alreadyKnown && newest.status === "Pending") {
+                    setLatestIncomingBooking(newest);
+                    setIsIncomingAlertOpen(true);
+                    const soundPref = localStorage.getItem("royal_drive_notif_sound");
+                    if (soundPref !== "false") {
+                      playNotificationChime();
+                    }
+                    const formattedPrice = new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      maximumFractionDigits: 0
+                    }).format(newest.totalPrice);
+                    sendDesktopNotification(
+                      "🚨 Pemesanan Sewa Mobil Baru!",
+                      `${newest.client} memesan ${newest.car} (${newest.durationDays} hari - ${formattedPrice})`
+                    );
                   }
-                  const formattedPrice = new Intl.NumberFormat("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                    maximumFractionDigits: 0
-                  }).format(newest.totalPrice);
-                  sendDesktopNotification(
-                    "🚨 Pemesanan Sewa Mobil Baru!",
-                    `${newest.client} memesan ${newest.car} (${newest.durationDays} hari - ${formattedPrice})`
-                  );
-                }
-                safeSaveBookings(data.bookings);
-                return data.bookings;
-              });
+                  safeSaveBookings(data.bookings);
+                  return data.bookings;
+                });
+              } else {
+                setBookings([]);
+                safeSaveBookings([]);
+              }
             }
           }
         } catch {
@@ -1258,7 +1145,7 @@ export default function AdminDashboard({
   bookings.forEach(b => {
     carCounts[b.car] = (carCounts[b.car] || 0) + 1;
   });
-  let dynamicPopularCar = "Toyota Avanza";
+  let dynamicPopularCar = bookings.length > 0 ? "Toyota Avanza" : "-";
   let maxCount = 0;
   for (const [cName, cnt] of Object.entries(carCounts)) {
     if (cnt > maxCount) {
@@ -3031,7 +2918,7 @@ export default function AdminDashboard({
                     {dynamicPopularCar}
                   </span>
                   <span className="text-[10px] text-slate-500 block mt-1">
-                    Paling sering disewa pelanggan
+                    {bookings.length > 0 ? "Paling sering disewa pelanggan" : "Belum ada pesanan masuk"}
                   </span>
                 </div>
               </div>
@@ -3058,42 +2945,56 @@ export default function AdminDashboard({
 
                   {/* Line chart simulation using SVG */}
                   <div className="h-56 relative w-full flex items-center justify-center">
-                    <svg className="w-full h-full text-slate-200" viewBox="0 0 600 200" fill="none">
-                      <line x1="0" y1="50" x2="600" y2="50" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
-                      <line x1="0" y1="100" x2="600" y2="100" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
-                      <line x1="0" y1="150" x2="600" y2="150" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
-                      
-                      <text x="15" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">JAN</text>
-                      <text x="120" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">FEB</text>
-                      <text x="230" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">MAR</text>
-                      <text x="340" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">APR</text>
-                      <text x="450" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">MEI</text>
-                      <text x="555" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">JUN</text>
+                    {dynamicTotalRevenue > 0 ? (
+                      <svg className="w-full h-full text-slate-200" viewBox="0 0 600 200" fill="none">
+                        <line x1="0" y1="50" x2="600" y2="50" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+                        <line x1="0" y1="100" x2="600" y2="100" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+                        <line x1="0" y1="150" x2="600" y2="150" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
+                        
+                        <text x="15" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">JAN</text>
+                        <text x="120" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">FEB</text>
+                        <text x="230" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">MAR</text>
+                        <text x="340" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">APR</text>
+                        <text x="450" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">MEI</text>
+                        <text x="555" y="195" fill="rgba(0,0,0,0.4)" fontSize="9" fontWeight="600">JUN</text>
 
-                      <defs>
-                        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#C5A059" stopOpacity="0.3" />
-                          <stop offset="100%" stopColor="#C5A059" stopOpacity="0.0" />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d="M 20 160 Q 120 115 230 130 T 450 70 T 565 45 L 565 180 L 20 180 Z"
-                        fill="url(#chartGrad)"
-                      />
+                        <defs>
+                          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#C5A059" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#C5A059" stopOpacity="0.0" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d="M 20 160 Q 120 115 230 130 T 450 70 T 565 45 L 565 180 L 20 180 Z"
+                          fill="url(#chartGrad)"
+                        />
 
-                      <path
-                        d="M 20 160 Q 120 115 230 130 T 450 70 T 565 45"
-                        stroke="#C5A059"
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                        <path
+                          d="M 20 160 Q 120 115 230 130 T 450 70 T 565 45"
+                          stroke="#C5A059"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
 
-                      <circle cx="20" cy="160" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
-                      <circle cx="230" cy="130" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
-                      <circle cx="450" cy="70" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
-                      <circle cx="565" cy="45" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
-                    </svg>
+                        <circle cx="20" cy="160" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
+                        <circle cx="230" cy="130" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
+                        <circle cx="450" cy="70" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
+                        <circle cx="565" cy="45" r="4.5" fill="#FFFFFF" stroke="#C5A059" strokeWidth="2.5" />
+                      </svg>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-center p-6 space-y-2">
+                        <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center">
+                          <DollarSign className="w-5 h-5" />
+                        </div>
+                        <p className="font-display font-bold text-sm text-slate-800">
+                          Total Pendapatan Masuk: Rp 0
+                        </p>
+                        <p className="text-xs text-slate-400 max-w-sm">
+                          Belum ada transaksi sewa masuk. Grafik pendapatan akan otomatis terisi secara realtime setelah ada pesanan terkonfirmasi.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -3125,43 +3026,53 @@ export default function AdminDashboard({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {bookings.slice(0, 5).map((b) => (
-                          <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
-                            <td className="py-3 px-3">
-                              <span className="font-bold text-slate-900 block truncate">{b.client}</span>
-                              <span className="text-[10px] font-mono text-slate-400">{b.id}</span>
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className="font-semibold text-slate-800 block truncate">{b.car}</span>
-                              <span className="text-[10px] text-slate-500">{b.rentalType}</span>
-                            </td>
-                            <td className="py-3 px-3 font-mono font-bold text-slate-800">
-                              {formatCurrency(b.totalPrice)}
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                b.status === "Pending"
-                                  ? "bg-amber-100 text-amber-800 border border-amber-200"
-                                  : b.status === "Active"
-                                    ? "bg-blue-100 text-blue-800 border border-blue-200"
-                                    : b.status === "Completed"
-                                      ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                      : "bg-slate-100 text-slate-600"
-                              }`}>
-                                {b.status}
-                              </span>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <button
-                                type="button"
-                                onClick={() => setSelectedVerificationBooking(b)}
-                                className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
-                              >
-                                Detail
-                              </button>
+                        {bookings.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="py-8 text-center text-slate-400">
+                              <Calendar className="w-7 h-7 mx-auto mb-1.5 text-slate-300" />
+                              <p className="font-semibold text-xs text-slate-600">Belum ada reservasi aktif</p>
+                              <p className="text-[10px] text-slate-400">Data pesanan saat ini masih kosong (0 pesanan)</p>
                             </td>
                           </tr>
-                        ))}
+                        ) : (
+                          bookings.slice(0, 5).map((b) => (
+                            <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="py-3 px-3">
+                                <span className="font-bold text-slate-900 block truncate">{b.client}</span>
+                                <span className="text-[10px] font-mono text-slate-400">{b.id}</span>
+                              </td>
+                              <td className="py-3 px-3">
+                                <span className="font-semibold text-slate-800 block truncate">{b.car}</span>
+                                <span className="text-[10px] text-slate-500">{b.rentalType}</span>
+                              </td>
+                              <td className="py-3 px-3 font-mono font-bold text-slate-800">
+                                {formatCurrency(b.totalPrice)}
+                              </td>
+                              <td className="py-3 px-3">
+                                <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                  b.status === "Pending"
+                                    ? "bg-amber-100 text-amber-800 border border-amber-200"
+                                    : b.status === "Active"
+                                      ? "bg-blue-100 text-blue-800 border border-blue-200"
+                                      : b.status === "Completed"
+                                        ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                                        : "bg-slate-100 text-slate-600"
+                                }`}>
+                                  {b.status}
+                                </span>
+                              </td>
+                              <td className="py-3 px-3 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedVerificationBooking(b)}
+                                  className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                                >
+                                  Detail
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -3883,6 +3794,24 @@ export default function AdminDashboard({
               </div>
 
               <div className="flex items-center space-x-2.5 self-start sm:self-auto">
+                {bookings.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm("Peringatan: Apakah Anda yakin ingin mengosongkan semua data pesanan dan me-reset pendapatan menjadi Rp 0? Tindakan ini tidak dapat dibatalkan.")) {
+                        updateAndSaveBookings([]);
+                        setToastMessage("Semua data pesanan & pendapatan berhasil di-reset menjadi 0!");
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 4000);
+                      }
+                    }}
+                    className="flex items-center space-x-1.5 bg-white border border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600 font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
+                    title="Kosongkan seluruh data pesanan & reset pendapatan ke 0"
+                  >
+                    <Trash className="w-3.5 h-3.5 text-red-500" />
+                    <span>Kosongkan Pesanan</span>
+                  </button>
+                )}
                 <button
                   onClick={handleExportCSV}
                   className="flex items-center space-x-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
@@ -4054,8 +3983,8 @@ export default function AdminDashboard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs text-slate-650 font-sans">
-                  {bookings
-                    .filter((b) => {
+                  {(() => {
+                    const filtered = bookings.filter((b) => {
                       if (bookingFilterStatus !== "All" && b.status !== bookingFilterStatus) return false;
                       if (bookingSearchQuery.trim()) {
                         const q = bookingSearchQuery.toLowerCase();
@@ -4067,8 +3996,23 @@ export default function AdminDashboard({
                         );
                       }
                       return true;
-                    })
-                    .map((booking) => (
+                    });
+
+                    if (filtered.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={8} className="py-14 text-center text-slate-400">
+                            <Calendar className="w-10 h-10 mx-auto mb-2 text-slate-300" />
+                            <p className="font-bold text-sm text-slate-700">Belum Ada Data Pesanan</p>
+                            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                              Daftar reservasi sewa armada saat ini masih kosong (0 pesanan). Pesanan baru dari pelanggan akan otomatis muncul di sini.
+                            </p>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return filtered.map((booking) => (
                       <tr key={booking.id} className="hover:bg-slate-50/60 transition-colors">
                         {/* ID & Tipe */}
                         <td className="py-4 px-4">
@@ -4352,7 +4296,8 @@ export default function AdminDashboard({
                           )}
                         </td>
                       </tr>
-                    ))}
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>
