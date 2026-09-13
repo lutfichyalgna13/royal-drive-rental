@@ -526,6 +526,9 @@ export interface BlogPost {
   date: string;
   snippet: string;
   image: string;
+  content?: string;
+  readTime?: string;
+  author?: string;
 }
 
 export const blogPostsData: BlogPost[] = [
